@@ -1,7 +1,7 @@
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraTypes.h"
-#include "mlir/IR/DialectImplementation.h" // Required for AsmPrinter/Parser
+#include "mlir/IR/DialectImplementation.h"  // Required for AsmPrinter/Parser
 
 using namespace mlir;
 using namespace mlir::neura;
@@ -25,8 +25,7 @@ void NeuraDialect::initialize() {
 // Type parsing/printing
 Type NeuraDialect::parseType(DialectAsmParser &parser) const {
   StringRef keyword;
-  if (parser.parseKeyword(&keyword))
-    return Type();
+  if (parser.parseKeyword(&keyword)) return Type();
 
   if (keyword == PredicatedValue::name) {
     return PredicatedValue::parse(parser);

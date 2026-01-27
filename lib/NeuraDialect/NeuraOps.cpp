@@ -1,10 +1,11 @@
 #include "NeuraDialect/NeuraOps.h"
+
 #include "NeuraDialect/NeuraDialect.h"
+#include "llvm/Support/LogicalResult.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/OpImplementation.h"
-#include "llvm/Support/LogicalResult.h"
 
 using namespace mlir;
 using namespace mlir::neura;
@@ -26,8 +27,9 @@ LogicalResult YieldOp::verify() {
     return success();
   }
 
-  return emitOpError("expects parent op to be one of 'neura.fused_op', "
-                     "'neura.kernel', or 'func.func'");
+  return emitOpError(
+      "expects parent op to be one of 'neura.fused_op', "
+      "'neura.kernel', or 'func.func'");
 }
 
 LogicalResult PhiStartOp::verify() {
@@ -53,8 +55,9 @@ LogicalResult PhiStartOp::verify() {
     }
 
     if (!isa<ReserveOp>(def_op)) {
-      return emitOpError("reserve operand must be produced by a neura.reserve "
-                         "operation.");
+      return emitOpError(
+          "reserve operand must be produced by a neura.reserve "
+          "operation.");
     }
   }
 

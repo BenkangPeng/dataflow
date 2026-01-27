@@ -1,6 +1,9 @@
+#include <memory>
+
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraPasses.h"
+#include "llvm/ADT/STLExtras.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/Builders.h"
@@ -9,8 +12,6 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Support/TypeID.h"
 #include "mlir/Transforms/RegionUtils.h"
-#include "llvm/ADT/STLExtras.h"
-#include <memory>
 
 using namespace mlir;
 
@@ -135,7 +136,7 @@ struct WrapLoopInKernelPass
     }
   }
 };
-} // namespace
+}  // namespace
 
 std::unique_ptr<Pass> mlir::neura::createWrapLoopInKernelPass() {
   return std::make_unique<WrapLoopInKernelPass>();

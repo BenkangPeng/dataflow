@@ -24,4 +24,4 @@
 #include "NeuraDialect/Neura.h.inc"
 #undef GET_OP_CLASSES
 
-#endif // NEURA_OPS_H
+#endif  // NEURA_OPS_H

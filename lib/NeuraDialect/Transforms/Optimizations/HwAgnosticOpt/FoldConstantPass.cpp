@@ -1,6 +1,11 @@
+#include <cassert>
+#include <string>
+
+#include "NeuraDialect/NeuraAttributes.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraTypes.h"
-#include "NeuraDialect/NeuraAttributes.h"
+#include "llvm/Support/LogicalResult.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/Builders.h"
@@ -11,10 +16,6 @@
 #include "mlir/Support/LLVM.h"
 #include "mlir/Support/TypeID.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
-#include "llvm/Support/LogicalResult.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <string>
 
 using namespace mlir;
 
@@ -61,9 +62,9 @@ void addConstantAttribute(Operation *op, StringRef attr_name,
 
 // Information about a single constant operand to fold.
 struct ConstantOperandInfo {
-  size_t index;           // Index in the original operand list.
-  Attribute const_value;  // The constant value.
-  Operation *defining_op; // The operation that defines this constant.
+  size_t index;            // Index in the original operand list.
+  Attribute const_value;   // The constant value.
+  Operation *defining_op;  // The operation that defines this constant.
 };
 
 // Analyzes operands and returns information about constants to fold.
@@ -93,7 +94,7 @@ SmallVector<ConstantOperandInfo> analyzeOperandsForFolding(Operation *op) {
       // Rule 1: If this is operand 0 and there are no other non-const operands,
       // we must keep it (MLIR operations need at least one operand).
       if (i == 0 && !has_non_const) {
-        continue; // Don't fold this one.
+        continue;  // Don't fold this one.
       }
 
       // Rule 2: Only folds at most 1 constant.
@@ -209,9 +210,9 @@ struct GenericFuseConstantPattern : public OpRewritePattern<OpType> {
 
   // Virtual function to create the operation with folded constants.
   // Must be implemented by derived classes.
-  virtual Operation *
-  createOpWithFoldedConstants(OpType op, ArrayRef<Value> non_const_operands,
-                              PatternRewriter &rewriter) const = 0;
+  virtual Operation *createOpWithFoldedConstants(
+      OpType op, ArrayRef<Value> non_const_operands,
+      PatternRewriter &rewriter) const = 0;
 };
 
 // =========================================
@@ -219,28 +220,27 @@ struct GenericFuseConstantPattern : public OpRewritePattern<OpType> {
 // =========================================
 
 // Helper macro to define a pattern for a binary operation.
-#define DEFINE_BINARY_OP_PATTERN(OP_NAME, OP_TYPE)                             \
-  struct Fuse##OP_NAME##ConstantPattern                                        \
-      : public GenericFuseConstantPattern<neura::OP_TYPE> {                    \
-    using GenericFuseConstantPattern<                                          \
-        neura::OP_TYPE>::GenericFuseConstantPattern;                           \
-    Operation *                                                                \
-    createOpWithFoldedConstants(neura::OP_TYPE op,                             \
-                                ArrayRef<Value> non_const_operands,            \
-                                PatternRewriter &rewriter) const override {    \
-      /* Uses generic Operation create and copy attributes. */                 \
-      OperationState state(op.getLoc(), op.getOperationName());                \
-      state.addOperands(non_const_operands);                                   \
-      state.addTypes(op->getResultTypes());                                    \
-      /* Copies attributes except operandSegmentSizes (will be                 \
-       * auto-generated). */                                                   \
-      for (auto attr : op->getAttrs()) {                                       \
-        if (attr.getName() != "operandSegmentSizes") {                         \
-          state.addAttribute(attr.getName(), attr.getValue());                 \
-        }                                                                      \
-      }                                                                        \
-      return rewriter.create(state);                                           \
-    }                                                                          \
+#define DEFINE_BINARY_OP_PATTERN(OP_NAME, OP_TYPE)              \
+  struct Fuse##OP_NAME##ConstantPattern                         \
+      : public GenericFuseConstantPattern<neura::OP_TYPE> {     \
+    using GenericFuseConstantPattern<                           \
+        neura::OP_TYPE>::GenericFuseConstantPattern;            \
+    Operation *createOpWithFoldedConstants(                     \
+        neura::OP_TYPE op, ArrayRef<Value> non_const_operands,  \
+        PatternRewriter &rewriter) const override {             \
+      /* Uses generic Operation create and copy attributes. */  \
+      OperationState state(op.getLoc(), op.getOperationName()); \
+      state.addOperands(non_const_operands);                    \
+      state.addTypes(op->getResultTypes());                     \
+      /* Copies attributes except operandSegmentSizes (will be  \
+       * auto-generated). */                                    \
+      for (auto attr : op->getAttrs()) {                        \
+        if (attr.getName() != "operandSegmentSizes") {          \
+          state.addAttribute(attr.getName(), attr.getValue());  \
+        }                                                       \
+      }                                                         \
+      return rewriter.create(state);                            \
+    }                                                           \
   };
 
 // Defines patterns for all binary arithmetic operations.
@@ -322,9 +322,9 @@ struct FuseGEPConstantPattern : public GenericFuseConstantPattern<neura::GEP> {
     }
   }
 
-  Operation *
-  createOpWithFoldedConstants(neura::GEP op, ArrayRef<Value> non_const_operands,
-                              PatternRewriter &rewriter) const override {
+  Operation *createOpWithFoldedConstants(
+      neura::GEP op, ArrayRef<Value> non_const_operands,
+      PatternRewriter &rewriter) const override {
     // GEP: operand 0 is base, rest are indices.
     // Uses the provided non_const_operands which already determined what to
     // keep.
@@ -396,7 +396,7 @@ struct FuseLoadIndexedConstantPattern
 
     // Creates new LoadIndexed without base.
     OperationState state(op.getLoc(), op.getOperationName());
-    state.addOperands(indices); // Only indices, no base.
+    state.addOperands(indices);  // Only indices, no base.
     state.addTypes(op->getResultTypes());
 
     // Copies all attributes except operandSegmentSizes.
@@ -434,7 +434,8 @@ struct FuseStoreIndexedConstantPattern
   LogicalResult matchAndRewrite(neura::StoreIndexedOp op,
                                 PatternRewriter &rewriter) const override {
     // Checks if already folded.
-    if (op->hasAttr(neura::attr::kLhsValue) || op->hasAttr(neura::attr::kRhsValue)) {
+    if (op->hasAttr(neura::attr::kLhsValue) ||
+        op->hasAttr(neura::attr::kRhsValue)) {
       return failure();
     }
 
@@ -639,10 +640,10 @@ struct FoldConstantPass
   }
 };
 
-} // namespace
+}  // namespace
 
 namespace mlir::neura {
 std::unique_ptr<Pass> createFoldConstantPass() {
   return std::make_unique<FoldConstantPass>();
 }
-} // namespace mlir::neura
+}  // namespace mlir::neura

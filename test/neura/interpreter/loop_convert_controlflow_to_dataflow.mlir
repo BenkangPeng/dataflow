@@ -6,7 +6,7 @@
 // RUN:   --leverage-predicated-value \
 // RUN:   --transform-ctrl-to-data-flow \
 // RUN:   --fold-constant \
-// RUN:   %s -o %t_dataflow.mlir 
+// RUN:   %s -o %t_dataflow.mlir
 
 // RU: neura-interpreter %t_dataflow.mlir --verbose --dataflow > %t_output.txt
 

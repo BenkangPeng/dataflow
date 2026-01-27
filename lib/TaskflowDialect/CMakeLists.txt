@@ -6,7 +6,7 @@ add_mlir_dialect_library(MLIRTaskflow
         DEPENDS
         MLIRConversionIncGen
         MLIRTaskflowTransformsIncGen
-        
+
         LINK_LIBS PUBLIC
         MLIRIR
         MLIRSupport

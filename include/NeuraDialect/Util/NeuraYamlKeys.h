@@ -35,6 +35,6 @@ constexpr llvm::StringLiteral kKingMesh = "king_mesh";
 constexpr llvm::StringLiteral kKingMeshAlt = "king mesh";
 constexpr llvm::StringLiteral kRing = "ring";
 
-} // namespace yamlkeys
-} // namespace neura
-} // namespace mlir
+}  // namespace yamlkeys
+}  // namespace neura
+}  // namespace mlir

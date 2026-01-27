@@ -160,7 +160,7 @@ The ASM format is a human-readable assembly-style view per tile.
   - `[DIRECTION, COLOR]` — directional with routing color
     - e.g., `[EAST, RED]`, `[WEST, RED]`, `[NORTH, RED]`, `[SOUTH, RED]`
 
-## Timing Execution Examples 
+## Timing Execution Examples
 ### PE(0,0)
 ```
 {

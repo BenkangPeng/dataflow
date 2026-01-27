@@ -5,4 +5,4 @@
 #define GET_TYPEDEF_CLASSES
 #include "TaskflowDialect/TaskflowTypes.h.inc"
 
-#endif // TASKFLOW_TYPES_H
+#endif  // TASKFLOW_TYPES_H

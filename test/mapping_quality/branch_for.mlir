@@ -69,7 +69,7 @@
 // RUN:   --insert-data-mov \
 // RUN:   --map-to-accelerator="mapping-strategy=heuristic backtrack-config=customized" \
 // RUN:   --architecture-spec=../arch_spec/architecture.yaml \
-// RUN:   --generate-code 
+// RUN:   --generate-code
 // RUN: FileCheck %s --input-file=tmp-generated-instructions.yaml -check-prefix=YAML
 // RUN: FileCheck %s --input-file=tmp-generated-instructions.asm --check-prefix=ASM
 

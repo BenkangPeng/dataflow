@@ -18,5 +18,3 @@ int main() {
   kernel_gemv_int(A, x, y);
   return 0;
 }
-
-

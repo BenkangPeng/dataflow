@@ -2,13 +2,13 @@
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraPasses.h"
+#include "llvm/Support/Casting.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/IR/IRMapping.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
-#include "llvm/Support/Casting.h"
 
 using namespace mlir;
 
@@ -36,7 +36,6 @@ struct InsertDataMovForNeuraOps : public RewritePattern {
       }
       parent_op = parent_op->getParentOp();
     }
-    
 
     bool all_inputs_are_mov_except_reserve =
         llvm::all_of(op->getOperands(), [](Value v) {
@@ -46,7 +45,7 @@ struct InsertDataMovForNeuraOps : public RewritePattern {
         });
 
     if (all_inputs_are_mov_except_reserve) {
-      return failure(); // All operands are already handled
+      return failure();  // All operands are already handled
     }
 
     // // Skips ops that already being inserted mov on the operands.
@@ -83,9 +82,8 @@ struct InsertDataMovForNeuraOps : public RewritePattern {
 
     // Skips adding mov if the consumer is ctrl_mov.
     if (isa<neura::CtrlMovOp>(op)) {
-      return failure(); // do not rewrite
+      return failure();  // do not rewrite
     }
-
 
     // Wraps operands in mov, but skip those already wrapped or from reserve.
     SmallVector<Value> new_operands;
@@ -93,8 +91,10 @@ struct InsertDataMovForNeuraOps : public RewritePattern {
     for (Value operand : op->getOperands()) {
       Operation *producer = operand.getDefiningOp();
 
-      // Skips adding mov for any operand that comes from a reserve op or already from data_mov.
-      if (producer && (isa<neura::ReserveOp>(producer) || isa<neura::DataMovOp>(producer))) {
+      // Skips adding mov for any operand that comes from a reserve op or
+      // already from data_mov.
+      if (producer && (isa<neura::ReserveOp>(producer) ||
+                       isa<neura::DataMovOp>(producer))) {
         new_operands.push_back(operand);
         continue;
       }
@@ -129,7 +129,8 @@ struct InsertDataMovForNeuraOps : public RewritePattern {
   }
 };
 
-// Wraps all fused_op's inputs and outputs with data_mov operations in the module.
+// Wraps all fused_op's inputs and outputs with data_mov operations in the
+// module.
 void wrapFusedOpsWithDataMov(ModuleOp module_op) {
   SmallVector<neura::FusedOp> fused_ops_to_process;
   module_op.walk([&](neura::FusedOp fused_op) {
@@ -145,13 +146,14 @@ void wrapFusedOpsWithDataMov(ModuleOp module_op) {
     SmallVector<Value> new_operands;
     for (Value operand : fused_op->getOperands()) {
       Operation *producer = operand.getDefiningOp();
-      
+
       // Skip if already wrapped in data_mov or from reserve
       if (isa_and_nonnull<neura::DataMovOp>(producer) ||
           isa_and_nonnull<neura::ReserveOp>(producer)) {
         new_operands.push_back(operand);
       } else {
-        auto mov = rewriter.create<neura::DataMovOp>(loc, operand.getType(), operand);
+        auto mov =
+            rewriter.create<neura::DataMovOp>(loc, operand.getType(), operand);
         new_operands.push_back(mov);
       }
     }
@@ -161,9 +163,9 @@ void wrapFusedOpsWithDataMov(ModuleOp module_op) {
     for (size_t i = 0; i < fused_op->getNumOperands(); ++i) {
       mapper.map(fused_op->getOperand(i), new_operands[i]);
     }
-    
+
     Operation *new_fused_op = rewriter.clone(*fused_op.getOperation(), mapper);
-    
+
     // Update the operands of the cloned operation
     for (size_t i = 0; i < new_operands.size(); ++i) {
       new_fused_op->setOperand(i, new_operands[i]);
@@ -171,33 +173,35 @@ void wrapFusedOpsWithDataMov(ModuleOp module_op) {
 
     // Wrap outputs with data_mov - create separate data_mov for each user
     rewriter.setInsertionPointAfter(new_fused_op);
-    
+
     // For each result of the fused_op, create a separate data_mov for each user
-    for (size_t result_idx = 0; result_idx < fused_op->getNumResults(); ++result_idx) {
+    for (size_t result_idx = 0; result_idx < fused_op->getNumResults();
+         ++result_idx) {
       Value old_result = fused_op->getResult(result_idx);
       Value new_result = new_fused_op->getResult(result_idx);
-      
+
       // Collect all users first (to avoid iterator invalidation)
-      SmallVector<OpOperand*> users_to_update;
+      SmallVector<OpOperand *> users_to_update;
       for (OpOperand &use : old_result.getUses()) {
         users_to_update.push_back(&use);
       }
-      
+
       // Create a separate data_mov for each user
       for (OpOperand *use : users_to_update) {
         Operation *user_op = use->getOwner();
-        
-        // If the user is already a data_mov (created by another fused_op's input wrapping),
-        // just update its operand to avoid nested data_mov
+
+        // If the user is already a data_mov (created by another fused_op's
+        // input wrapping), just update its operand to avoid nested data_mov
         if (auto existing_mov = llvm::dyn_cast<neura::DataMovOp>(user_op)) {
-          if (use->getOperandNumber() == 0) { // data_mov only has one operand
+          if (use->getOperandNumber() == 0) {  // data_mov only has one operand
             existing_mov->setOperand(0, new_result);
             continue;
           }
         }
-        
+
         // Otherwise, create a new data_mov for this user
-        auto mov = rewriter.create<neura::DataMovOp>(loc, new_result.getType(), new_result);
+        auto mov = rewriter.create<neura::DataMovOp>(loc, new_result.getType(),
+                                                     new_result);
         use->set(mov);
       }
     }
@@ -229,7 +233,8 @@ struct InsertDataMovPass
     // First, handle fused_op operations specially
     wrapFusedOpsWithDataMov(module_op);
 
-    // Then applies patterns to every region inside the module, excluding fused_op regions.
+    // Then applies patterns to every region inside the module, excluding
+    // fused_op regions.
     module_op.walk([&](Operation *op) {
       if (!op->getRegions().empty() && !llvm::isa<neura::FusedOp>(op)) {
         for (Region &region : op->getRegions()) {
@@ -241,7 +246,7 @@ struct InsertDataMovPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 namespace mlir {
 namespace neura {
@@ -250,5 +255,5 @@ std::unique_ptr<Pass> createInsertDataMovPass() {
   return std::make_unique<InsertDataMovPass>();
 }
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir

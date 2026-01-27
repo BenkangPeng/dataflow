@@ -1,4 +1,5 @@
 #include "NeuraDialect/Mapping/HeuristicMapping/HeuristicMapping.h"
+
 #include "NeuraDialect/Mapping/MappingState.h"
 #include "NeuraDialect/Mapping/mapping_util.h"
 #include "llvm/Support/raw_ostream.h"
@@ -37,10 +38,10 @@ bool HeuristicMapping::mapWithBacktrack(
                << sorted_ops_with_levels.size() - materialized_ops.size()
                << " non-materialized operations, " << materialized_ops.size()
                << " operations require physical mapping." << "\n";
-  
+
   llvm::outs() << "[HeuristicMapping] Materialized operations list:\n";
   for (size_t i = 0; i < materialized_ops.size(); ++i) {
-    llvm::outs() << i << " " << *materialized_ops[i].first 
+    llvm::outs() << i << " " << *materialized_ops[i].first
                  << " (level: " << materialized_ops[i].second << ")\n";
   }
 
@@ -74,13 +75,13 @@ bool HeuristicMapping::mapWithBacktrack(
 
     max_op_reached =
         std::max(max_op_reached,
-                 current_op_index); // Updates the max operation reached.
+                 current_op_index);  // Updates the max operation reached.
 
     if (max_op_reached - current_op_index > this->max_backtrack_depth) {
       llvm::outs() << "[HeuristicMapping] Max backtrack depth exceeded: "
                    << (max_op_reached - current_op_index) << " > "
                    << this->max_backtrack_depth << ".\n";
-      return false; // Backtrack failed, max depth exceeded.
+      return false;  // Backtrack failed, max depth exceeded.
     }
 
     Operation *current_op = materialized_ops[current_op_index].first;
@@ -93,14 +94,14 @@ bool HeuristicMapping::mapWithBacktrack(
       llvm::outs() << "[HeuristicMapping] No candidate locations found "
                    << "for operation: " << *current_op << "\n";
       // No candidate locations available, backtrack to the previous operation.
-      snapshots.pop_back(); // Restore the previous mapping state.
+      snapshots.pop_back();  // Restore the previous mapping state.
       candidate_history.pop_back();
       operation_index_history.pop_back();
 
       if (snapshots.empty()) {
         llvm::outs() << "[HeuristicMapping] No more snapshots to restore, "
                      << "mapping failed.\n";
-        return false; // No more snapshots to restore, mapping failed.
+        return false;  // No more snapshots to restore, mapping failed.
       }
 
       snapshots.back().restore(mapping_state);
@@ -109,7 +110,7 @@ bool HeuristicMapping::mapWithBacktrack(
                    << operation_index_history.back() << "(depth = "
                    << (max_op_reached - operation_index_history.back())
                    << ")\n";
-      continue; // Backtrack to the previous operation.
+      continue;  // Backtrack to the previous operation.
     }
 
     llvm::outs() << "[HeuristicMapping] Found " << candidate_locs.size()
@@ -193,5 +194,5 @@ bool HeuristicMapping::mapWithBacktrack(
   return false;
 }
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir

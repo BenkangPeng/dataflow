@@ -2,7 +2,11 @@
 #include "TaskflowDialect/TaskflowDialect.h"
 #include "TaskflowDialect/TaskflowOps.h"
 #include "TaskflowDialect/TaskflowTypes.h"
-
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/SetVector.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/Casting.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
@@ -17,11 +21,6 @@
 #include "mlir/IR/Value.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Support/LLVM.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SetVector.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/raw_ostream.h"
 
 using namespace mlir;
 using namespace mlir::taskflow;
@@ -92,9 +91,8 @@ static void collectExternalValues(Operation *root_op,
 }
 
 // Updates operands of an operation using the value mapping.
-static void
-updateOperationOperands(Operation *op,
-                        const DenseMap<Value, Value> &value_mapping) {
+static void updateOperationOperands(
+    Operation *op, const DenseMap<Value, Value> &value_mapping) {
   for (OpOperand &operand : op->getOpOperands()) {
     Value original_value = operand.get();
     auto it = value_mapping.find(original_value);
@@ -282,7 +280,6 @@ static TaskflowTaskOp convertLoopToTask(OpBuilder &builder,
 //------------------------------------------------------------------------------
 // Converts a single function to TaskFlow operations.
 static LogicalResult convertFuncToTaskflow(func::FuncOp func_op) {
-
   llvm::errs() << "\n===Converting function: " << func_op.getName() << "===\n";
 
   OpBuilder builder(func_op.getContext());
@@ -329,7 +326,7 @@ static LogicalResult convertFuncToTaskflow(func::FuncOp func_op) {
 
 class ConvertAffineToTaskflowPass
     : public PassWrapper<ConvertAffineToTaskflowPass, OperationPass<ModuleOp>> {
-public:
+ public:
   MLIR_DEFINE_EXPLICIT_INTERNAL_INLINE_TYPE_ID(ConvertAffineToTaskflowPass)
 
   StringRef getArgument() const final { return "convert-affine-to-taskflow"; }
@@ -358,7 +355,7 @@ public:
     }
   }
 };
-} // namespace
+}  // namespace
 
 std::unique_ptr<Pass> mlir::createConvertAffineToTaskflowPass() {
   return std::make_unique<ConvertAffineToTaskflowPass>();

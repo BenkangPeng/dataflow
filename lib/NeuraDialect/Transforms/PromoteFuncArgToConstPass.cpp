@@ -1,7 +1,11 @@
+#include <cassert>
+#include <string>
+
 #include "Common/AcceleratorAttrs.h"
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraPasses.h"
+#include "llvm/ADT/SetVector.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/IR/Block.h"
@@ -9,9 +13,6 @@
 #include "mlir/IR/Region.h"
 #include "mlir/IR/Value.h"
 #include "mlir/Pass/Pass.h"
-#include "llvm/ADT/SetVector.h"
-#include <cassert>
-#include <string>
 
 using namespace mlir;
 
@@ -90,10 +91,10 @@ struct PromoteFuncArgToConstPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 namespace mlir::neura {
 std::unique_ptr<Pass> createPromoteFuncArgToConstPass() {
   return std::make_unique<PromoteFuncArgToConstPass>();
 }
-} // namespace mlir::neura
+}  // namespace mlir::neura

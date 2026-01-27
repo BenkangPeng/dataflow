@@ -1,8 +1,14 @@
+#include <cassert>
+
 #include "NeuraDialect/NeuraAttributes.h"
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraPasses.h"
 #include "NeuraDialect/NeuraTypes.h"
+#include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/LogicalResult.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/MLIRContext.h"
@@ -12,11 +18,6 @@
 #include "mlir/Support/LLVM.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/LogicalResult.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
 
 using namespace mlir;
 
@@ -25,7 +26,7 @@ using namespace mlir;
 
 namespace {
 class OperationsToErase {
-public:
+ public:
   void markForErasure(Operation *op) {
     if (op) {
       ops_to_erase.insert(op);
@@ -43,12 +44,12 @@ public:
     ops_to_erase.clear();
   }
 
-private:
+ private:
   llvm::SetVector<Operation *> ops_to_erase;
 };
 
 class LoopAnalyzer {
-public:
+ public:
   struct LoopRecurrenceInfo {
     // The reserve operation that starts the loop.
     neura::ReserveOp reserve_op;
@@ -165,14 +166,14 @@ public:
     return nullptr;
   }
 
-private:
+ private:
   llvm::SmallVector<LoopRecurrenceInfo> loop_recurrences;
   llvm::DenseMap<Value, unsigned> phi_to_loop_recurrences;
   llvm::DenseSet<Value> loop_reserves;
 };
 
 class BackwardValueHandler {
-public:
+ public:
   BackwardValueHandler(PatternRewriter &rewriter) : rewriter(rewriter) {}
 
   Value createReserveForBackwardValue(Value backward_value,
@@ -202,14 +203,14 @@ public:
     return reserve_op.getResult();
   }
 
-private:
+ private:
   PatternRewriter &rewriter;
   // Map from backward values to their corresponding reserve values.
   llvm::DenseMap<Value, Value> backward_value_reserve_map;
 };
 
 class PhiStartToCarryPattern : public OpRewritePattern<neura::PhiStartOp> {
-public:
+ public:
   PhiStartToCarryPattern(MLIRContext *context,
                          const LoopAnalyzer &loop_analyzer,
                          BackwardValueHandler &backward_value_handler,
@@ -286,14 +287,14 @@ public:
     return success();
   }
 
-private:
+ private:
   const LoopAnalyzer &loop_analyzer;
   BackwardValueHandler &backward_value_handler;
   OperationsToErase &ops_to_erase;
 };
 
 class MergePatternFinder {
-public:
+ public:
   struct MergeCandidate {
     Value condition;
     Value true_value;
@@ -404,12 +405,11 @@ public:
 
   const MergeCandidate *getMergeCandidateForPhi(neura::PhiOp phi_op) const {
     auto it = phi_in_merge.find(phi_op);
-    if (it != phi_in_merge.end())
-      return &merge_candidates[it->second];
+    if (it != phi_in_merge.end()) return &merge_candidates[it->second];
     return nullptr;
   }
 
-private:
+ private:
   llvm::SmallVector<MergeCandidate> merge_candidates;
   llvm::DenseMap<neura::PhiOp, unsigned> phi_in_merge;
   llvm::DenseSet<neura::GrantPredicateOp> grants_in_merge;
@@ -417,13 +417,13 @@ private:
 };
 
 class PhiToMergePattern : public OpRewritePattern<neura::PhiOp> {
-public:
+ public:
   PhiToMergePattern(MLIRContext *context,
                     const MergePatternFinder &merge_pattern_finder,
                     OperationsToErase &ops_to_erase)
       : OpRewritePattern<neura::PhiOp>(context),
-        merge_pattern_finder(merge_pattern_finder), ops_to_erase(ops_to_erase) {
-  }
+        merge_pattern_finder(merge_pattern_finder),
+        ops_to_erase(ops_to_erase) {}
 
   LogicalResult matchAndRewrite(neura::PhiOp phi_op,
                                 PatternRewriter &rewriter) const override {
@@ -453,17 +453,18 @@ public:
     return success();
   }
 
-private:
+ private:
   const MergePatternFinder &merge_pattern_finder;
   OperationsToErase &ops_to_erase;
 };
 
 class SteerPhiToMergePattern : public OpRewritePattern<neura::PhiOp> {
-public:
+ public:
   SteerPhiToMergePattern(MLIRContext *context, OperationsToErase &ops_to_erase,
                          MergePatternFinder &merge_pattern_finder,
                          LoopAnalyzer &loop_analyzer)
-      : OpRewritePattern<neura::PhiOp>(context), ops_to_erase(ops_to_erase),
+      : OpRewritePattern<neura::PhiOp>(context),
+        ops_to_erase(ops_to_erase),
         merge_pattern_finder(merge_pattern_finder),
         loop_analyzer(loop_analyzer) {}
 
@@ -509,7 +510,7 @@ public:
     return failure();
   }
 
-private:
+ private:
   OperationsToErase &ops_to_erase;
   MergePatternFinder &merge_pattern_finder;
   LoopAnalyzer &loop_analyzer;
@@ -589,7 +590,7 @@ private:
 
 class GrantPredicateToSteerPattern
     : public OpRewritePattern<neura::GrantPredicateOp> {
-public:
+ public:
   GrantPredicateToSteerPattern(MLIRContext *context,
                                OperationsToErase &ops_to_erase)
       : OpRewritePattern<neura::GrantPredicateOp>(context),
@@ -619,12 +620,12 @@ public:
     return success();
   }
 
-private:
+ private:
   OperationsToErase &ops_to_erase;
 };
 
 class GrantOnceRemovalPattern : public OpRewritePattern<neura::GrantOnceOp> {
-public:
+ public:
   GrantOnceRemovalPattern(MLIRContext *context)
       : OpRewritePattern<neura::GrantOnceOp>(context) {}
 
@@ -734,8 +735,9 @@ struct TransformToSteerControlPass
         func->getAttrOfType<StringAttr>(neura::attr::kDataflowMode);
     if (!dataflow_mode_attr ||
         dataflow_mode_attr.getValue() != neura::attr::val::kModePredicate) {
-      func.emitError("transform-to-steer-control requires function to be in "
-                     "predicate mode");
+      func.emitError(
+          "transform-to-steer-control requires function to be in "
+          "predicate mode");
       signalPassFailure();
       return;
     }
@@ -748,7 +750,7 @@ struct TransformToSteerControlPass
         << func.getName() << "\n";
   }
 };
-} // namespace
+}  // namespace
 
 namespace mlir {
 namespace neura {
@@ -757,5 +759,5 @@ std::unique_ptr<Pass> createTransformToSteerControlPass() {
   return std::make_unique<TransformToSteerControlPass>();
 }
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir

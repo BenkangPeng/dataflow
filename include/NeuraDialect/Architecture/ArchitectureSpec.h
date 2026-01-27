@@ -9,9 +9,9 @@ namespace neura {
 
 // Enumeration for base topology types.
 enum class BaseTopology {
-  MESH,      // 4-connected mesh (N, S, W, E).
-  KING_MESH, // 8-connected mesh (N, S, W, E, NE, NW, SE, SW).
-  RING       // Ring topology (only outer boundary connections).
+  MESH,       // 4-connected mesh (N, S, W, E).
+  KING_MESH,  // 8-connected mesh (N, S, W, E, NE, NW, SE, SW).
+  RING        // Ring topology (only outer boundary connections).
 };
 
 // Structure for holding tile default configuration.
@@ -30,8 +30,8 @@ struct TileDefaults {
 
 // Structure for holding memory configuration.
 struct MemoryConfig {
-  int capacity = 1024;    // Memory capacity in bytes.
-  int banks_per_cgra = 4; // Number of banks per CGRA.
+  int capacity = 1024;     // Memory capacity in bytes.
+  int banks_per_cgra = 4;  // Number of banks per CGRA.
 };
 
 // Structure for holding tile override configuration.
@@ -49,8 +49,8 @@ struct TileOverride {
 
 // Structure for holding link default configuration.
 struct LinkDefaults {
-  int latency = 1;    // default latency.
-  int bandwidth = 32; // default bandwidth.
+  int latency = 1;     // default latency.
+  int bandwidth = 32;  // default bandwidth.
 };
 
 // Structure for holding link override configuration.
@@ -75,7 +75,7 @@ std::string getArchitectureSpecFile();
 // Function for getting tile defaults configuration.
 TileDefaults getTileDefaults();
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
-#endif // NEURA_ARCHITECTURE_SPEC_H
+#endif  // NEURA_ARCHITECTURE_SPEC_H

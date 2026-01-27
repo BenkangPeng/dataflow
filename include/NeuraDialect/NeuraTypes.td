@@ -19,21 +19,21 @@ def Neura_PredicatedValue : Neura_Type<"PredicatedValue", "data"> {
     Contains:
     - A base value type (integer, float, or vector)
     - An i1 predicate indicating validity
-    
+
     Examples:
       !neura.data<f32>    // Predicated float
       !neura.data<i32>    // Predicated integer
       !neura.data<vector> // Predicated vector
   }];
 
-  let parameters = (ins 
+  let parameters = (ins
     "Type":$valueType,
     "IntegerType":$predicateType
   );
 
   // Verify predicate is i1
   let genVerifyDecl = 1;
-  
+
   // Fix: Update assembly format syntax with proper semicolon
   // let assemblyFormat = "<$valueType,$predicateType>";
   let hasCustomAssemblyFormat = 1;

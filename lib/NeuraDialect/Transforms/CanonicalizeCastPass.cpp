@@ -142,10 +142,10 @@ struct CanonicalizeCastPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 namespace mlir::neura {
 std::unique_ptr<mlir::Pass> createCanonicalizeCastPass() {
   return std::make_unique<CanonicalizeCastPass>();
 }
-} // namespace mlir::neura
+}  // namespace mlir::neura

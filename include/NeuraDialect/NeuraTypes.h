@@ -12,7 +12,7 @@ namespace neura {
 namespace detail {
 // Storage class for predicated value type.
 struct PredicatedValueStorage : public mlir::TypeStorage {
-  using KeyTy = std::pair<Type, IntegerType>; // valueType and predicateType
+  using KeyTy = std::pair<Type, IntegerType>;  // valueType and predicateType
 
   PredicatedValueStorage(Type valueType, IntegerType predicateType)
       : valueType(valueType), predicateType(predicateType) {}
@@ -22,8 +22,8 @@ struct PredicatedValueStorage : public mlir::TypeStorage {
     return key.first == valueType && key.second == predicateType;
   }
 
-  static PredicatedValueStorage *
-  construct(mlir::TypeStorageAllocator &allocator, const KeyTy &key) {
+  static PredicatedValueStorage *construct(
+      mlir::TypeStorageAllocator &allocator, const KeyTy &key) {
     // Allocate the storage instance and construct it
     return new (allocator.allocate<PredicatedValueStorage>())
         PredicatedValueStorage(key.first, key.second);
@@ -33,15 +33,15 @@ struct PredicatedValueStorage : public mlir::TypeStorage {
     return llvm::hash_combine(key.first, key.second);
   }
 
-  Type valueType;            // The type being predicated
-  IntegerType predicateType; // The predicate type (usually i1)
+  Type valueType;             // The type being predicated
+  IntegerType predicateType;  // The predicate type (usually i1)
 };
-} // namespace detail
+}  // namespace detail
 
 class PredicatedValue
     : public mlir::Type::TypeBase<PredicatedValue, mlir::Type,
                                   detail::PredicatedValueStorage> {
-public:
+ public:
   using Base = mlir::Type::TypeBase<PredicatedValue, mlir::Type,
                                     detail::PredicatedValueStorage>;
   static constexpr llvm::StringLiteral name = "data";
@@ -61,9 +61,9 @@ public:
   }
 
   // New overload verify that accepts the KeyTy as expected by MLIR
-  static LogicalResult
-  verify(function_ref<InFlightDiagnostic()> emitError,
-         const detail::PredicatedValueStorage::KeyTy &key) {
+  static LogicalResult verify(
+      function_ref<InFlightDiagnostic()> emitError,
+      const detail::PredicatedValueStorage::KeyTy &key) {
     if (!key.second.isInteger(1))
       return emitError() << "predicate must be i1 type";
     return success();
@@ -76,7 +76,7 @@ public:
   void print(AsmPrinter &printer) const;
 };
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
-#endif // NEURA_TYPES_H
+#endif  // NEURA_TYPES_H

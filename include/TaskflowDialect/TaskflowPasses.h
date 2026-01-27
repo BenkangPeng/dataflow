@@ -3,13 +3,13 @@
 #ifndef TASKFLOW_PASSES_H
 #define TASKFLOW_PASSES_H
 
+#include <memory>
+
 #include "TaskflowDialect/TaskflowDialect.h"
 #include "TaskflowDialect/TaskflowOps.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Pass/PassRegistry.h"
-
-#include <memory>
 namespace mlir {
 namespace taskflow {
 // Passes defined in TaskflowPasses.td
@@ -20,7 +20,7 @@ std::unique_ptr<mlir::Pass> createCanonicalizeTaskPass();
 
 #define GEN_PASS_REGISTRATION
 #include "TaskflowDialect/TaskflowPasses.h.inc"
-} // namespace taskflow
-} // namespace mlir
+}  // namespace taskflow
+}  // namespace mlir
 
-#endif // TASKFLOW_PASSES_H
+#endif  // TASKFLOW_PASSES_H

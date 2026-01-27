@@ -71,7 +71,7 @@ def Neura_YieldOp : Op<NeuraDialect, "yield", [Terminator, Pure, ReturnLike]> {
         neura.yield %v : f32
       } : f32
   }];
-  
+
   let arguments = (ins Variadic<AnyType>:$values);
 
   let builders = [
@@ -204,13 +204,13 @@ def Neura_FMaxOp : Op<NeuraDialect, "fmax"> {
     Supports two NaN propagation semantics:
     - "maxnum": Returns non-NaN value when one operand is NaN (llvm.maxnum)
     - "maximum": Propagates NaN when any operand is NaN (llvm.maximum)
-    
+
     Example:
       %result = neura.fmax<"maxnum">(%a, %b : f32) : f32 -> f32
       %result = neura.fmax<"maximum">(%a, %b : f32) : f32 -> f32
   }];
   let opName = "fmax";
-  let arguments = (ins AnyType:$lhs, Optional<AnyType>:$rhs, 
+  let arguments = (ins AnyType:$lhs, Optional<AnyType>:$rhs,
                    DefaultValuedAttr<StrAttr, "\"maxnum\"">:$nan_semantic);
   let results = (outs AnyType:$result);
   let traits = [SameOperandsAndResultElementType];
@@ -225,7 +225,7 @@ def Neura_FMinOp : Op<NeuraDialect, "fmin"> {
     Supports two NaN propagation semantics:
     - "minnum": Returns non-NaN value when one operand is NaN (llvm.minnum)
     - "minimum": Propagates NaN when any operand is NaN (llvm.minimum)
-    
+
     Example:
       %result = neura.fmin<"minnum">(%a, %b : f32) : f32 -> f32
       %result = neura.fmin<"minimum">(%a, %b : f32) : f32 -> f32
@@ -301,7 +301,7 @@ def Neura_MemsetOp : Op<NeuraDialect, "memset"> {
     Example:
       neura.memset %dest, %value, %len {is_volatile = false} : !neura.data<ptr, i1>, i8, i64
   }];
-  let arguments = (ins AnyType:$dest, AnyType:$value, AnyType:$len, 
+  let arguments = (ins AnyType:$dest, AnyType:$value, AnyType:$len,
                    BoolAttr:$is_volatile);
   let results = (outs);
   // let assemblyFormat = "$dest `,` $value `,` $len attr-dict `:` type($dest) `,` type($value) `,` type($len)";
@@ -383,7 +383,7 @@ def Neura_ReturnVoidOp : Op<NeuraDialect, "return_void", []>{
   let description = [{
     Terminates a void function. The trigger operand provides the execution
     condition in dataflow mode - the return executes when the trigger becomes valid.
-    
+
     Without a trigger (empty operands), this represents a static return that
     always executes. After canonicalization, void returns should have triggers.
 
@@ -534,7 +534,7 @@ def Neura_VectorReduceAddOp : Op<NeuraDialect, "vector.reduce.add"> {
   let description = [{
     Reduces a vector to a scalar by summing all elements.
     Similar to llvm.intr.vector.reduce.add.
-    
+
     Example:
       %sum = neura.vector.reduce.add %vec : vector<4xi32> -> i32
   }];
@@ -611,13 +611,13 @@ def Neura_PhiStartOp : Op<NeuraDialect, "phi_start">{
     Special phi operation for loop initialization where the first operand
     must be initial values and subsequent operands
     are the reserved or other values from different control paths.
-    
+
     This operation distinguishes loop initialization patterns from general
     phi merges, making it easier to identify and optimize recurrence cycles.
-    
+
     The first operand (reserve) represents the placeholder for the loop-carried
     value, while other operands provide the initial values for the first iteration.
-    
+
     Example:
       %reserved = neura.reserve : f32
       %init = neura.grant_once ... : f32
@@ -745,8 +745,8 @@ def Neura_LoopControlOp : Op<NeuraDialect, "loop_control">{
       %next_idx, %loop_valid = neura.loop_control(
         parent_valid = %parent_valid,
       ) <{
-           start_value = 0 : i64, 
-           end_value = 100 : i64, 
+           start_value = 0 : i64,
+           end_value = 100 : i64,
            step_value = 1 : i64,
            iteration_type = "increment"
          }> : !neura.data<i1, i1> -> !neura.data<i64, i1>, !neura.data<i1, i1>
@@ -759,7 +759,7 @@ def Neura_LoopControlOp : Op<NeuraDialect, "loop_control">{
     AnyAttr:$end,         // End index value.
     AnyAttr:$step         // Step value (increment or decrement based on iteration_type).
   );
-  
+
 
   let results = (outs
     AnyType:$nextindex,         // Current loop index
@@ -859,12 +859,12 @@ def Neura_FusedOp : Op<NeuraDialect, "fused_op", [NoTerminator]> {
     This operation wraps a frequently occurring subgraph pattern identified
     by graph mining passes. The pattern body is contained in a region
     that preserves the original operations and their data flow edges.
-    
+
     Attributes:
     - pattern_id: unique identifier for this pattern type
     - pattern_name: string description of the pattern
     - frequency: how many times this pattern occurs in the original graph
-    
+
     Example:
         %result = "neura.fused_op"(%arg0, %arg1) <{frequency = 5 : i64, pattern_id = 11 : i64, pattern_name = "mul->add"}> ({
         ^bb0(%arg0: !neura.data<!llvm.ptr, i1>, %arg1: !neura.data<!llvm.ptr, i1>):
@@ -873,16 +873,16 @@ def Neura_FusedOp : Op<NeuraDialect, "fused_op", [NoTerminator]> {
           "neura.yield"(%1) : (!neura.data<!llvm.ptr, i1>) -> ()
         })
   }];
-  
-  let arguments = (ins 
+
+  let arguments = (ins
     Variadic<AnyType>:$inputs,
     I64Attr:$pattern_id,
     StrAttr:$pattern_name,
     I64Attr:$frequency
   );
-  
+
   let results = (outs Variadic<AnyType>:$outputs);
   let regions = (region SizedRegion<1>:$body);
-  
+
   let hasVerifier = 0;
 }

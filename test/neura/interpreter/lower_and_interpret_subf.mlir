@@ -38,4 +38,3 @@ module {
     return %0 : f32
   }
 }
-

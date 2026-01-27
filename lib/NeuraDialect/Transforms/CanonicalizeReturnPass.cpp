@@ -1,7 +1,12 @@
+#include <memory>
+
 #include "Common/AcceleratorAttrs.h"
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraPasses.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/LLVMIR/LLVMTypes.h"
@@ -9,10 +14,6 @@
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Dominance.h"
 #include "mlir/Pass/Pass.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/raw_ostream.h"
-#include <memory>
 
 using namespace mlir;
 
@@ -244,7 +245,7 @@ struct CanonicalizeReturnPass
     }
   }
 };
-} // namespace
+}  // namespace
 
 std::unique_ptr<Pass> mlir::neura::createCanonicalizeReturnPass() {
   return std::make_unique<CanonicalizeReturnPass>();

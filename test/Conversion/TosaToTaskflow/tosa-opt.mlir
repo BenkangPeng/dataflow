@@ -4,7 +4,7 @@
 func.func @const_fold_test() -> tensor<4xf32> {
   %cst1 = arith.constant dense<[1.0, 2.0, 3.0, 4.0]> : tensor<4xf32>
   %cst2 = arith.constant dense<[10.0, 20.0, 30.0, 40.0]> : tensor<4xf32>
-  
+
   // This add should be constant folded by TOSA before lowering to Linalg
   %folded = tosa.add %cst1, %cst2 : (tensor<4xf32>, tensor<4xf32>) -> tensor<4xf32>
   return %folded : tensor<4xf32>

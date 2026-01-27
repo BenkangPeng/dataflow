@@ -2,13 +2,13 @@
 #include "Conversion/ConversionPasses.h"
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
+#include "llvm/Support/LogicalResult.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
-#include "llvm/Support/LogicalResult.h"
 
 using namespace mlir;
 using namespace mlir::neura;
@@ -71,7 +71,6 @@ struct MemRefAllocaToNeuraAlloca : public OpRewritePattern<memref::AllocaOp> {
 
 struct LowerMemRefToNeuraPass
     : public PassWrapper<LowerMemRefToNeuraPass, OperationPass<ModuleOp>> {
-
   MLIR_DEFINE_EXPLICIT_INTERNAL_INLINE_TYPE_ID(LowerMemRefToNeuraPass)
 
   StringRef getArgument() const override { return "lower-memref-to-neura"; }
@@ -105,7 +104,7 @@ struct LowerMemRefToNeuraPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 std::unique_ptr<Pass> mlir::createLowerMemRefToNeuraPass() {
   return std::make_unique<LowerMemRefToNeuraPass>();

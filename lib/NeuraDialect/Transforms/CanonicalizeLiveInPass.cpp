@@ -1,6 +1,12 @@
+#include <cassert>
+#include <string>
+
 #include "Common/AcceleratorAttrs.h"
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
+#include "llvm/ADT/SetVector.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/IR/Block.h"
@@ -10,11 +16,6 @@
 #include "mlir/IR/Value.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Support/LLVM.h"
-#include "llvm/ADT/SetVector.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <string>
 
 using namespace mlir;
 
@@ -159,7 +160,6 @@ bool isSingleSourceSingleSinkPattern(Block *defining_block, Block *using_block,
     // Checks if this block is on the path from defining_block to using_block.
     if (dom_info.dominates(defining_block, &block) &&
         dom_info.dominates(&block, using_block)) {
-
       // Checks if this block's terminator is a conditional branch.
       Operation *term_op = block.getTerminator();
       if (auto cond_br = dyn_cast<neura::CondBr>(term_op)) {
@@ -733,8 +733,9 @@ LogicalResult promoteLiveInValuesToBlockArgs(Region &region,
               true_operands.push_back(
                   block_value_to_arg[{pred_block, live_in}]);
             } else {
-              assert(false && "Unexpected live-in value (true branch of "
-                              "cond_br operation)");
+              assert(false &&
+                     "Unexpected live-in value (true branch of "
+                     "cond_br operation)");
             }
           }
         }
@@ -756,8 +757,9 @@ LogicalResult promoteLiveInValuesToBlockArgs(Region &region,
               false_operands.push_back(
                   block_value_to_arg[{pred_block, live_in}]);
             } else {
-              assert(false && "Unexpected live-in value (false branch of "
-                              "cond_br operation)");
+              assert(false &&
+                     "Unexpected live-in value (false branch of "
+                     "cond_br operation)");
             }
           }
         }
@@ -829,10 +831,10 @@ struct CanonicalizeLiveInPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 namespace mlir::neura {
 std::unique_ptr<Pass> createCanonicalizeLiveInPass() {
   return std::make_unique<CanonicalizeLiveInPass>();
 }
-} // namespace mlir::neura
+}  // namespace mlir::neura

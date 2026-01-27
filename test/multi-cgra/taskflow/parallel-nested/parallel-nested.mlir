@@ -17,8 +17,8 @@ module {
   // Example: Parallel nested loops scenario
   // Task 0: Single-level loop (vector scaling)
   // Task 1: Two-level nested loop (matrix multiplication)
-  func.func @parallel_nested_example(%A: memref<16xf32>, 
-                                      %B: memref<8x8xf32>, 
+  func.func @parallel_nested_example(%A: memref<16xf32>,
+                                      %B: memref<8x8xf32>,
                                       %C: memref<8x8xf32>,
                                       %D: memref<8x8xf32>,
                                       %scalar: f32) {
@@ -29,7 +29,7 @@ module {
       %scaled = arith.mulf %v, %scalar : f32
       affine.store %scaled, %A[%i] : memref<16xf32>
     }
-    
+
     // Task 1: Two-level nested loop - Matrix multiplication
     // Computes: D[i][j] = B[i][j] * C[i][j] (element-wise)
     affine.for %i = 0 to 8 {

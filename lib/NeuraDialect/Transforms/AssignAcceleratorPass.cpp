@@ -35,7 +35,7 @@ struct AssignAcceleratorPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 /// Registers the pass.
 namespace mlir {
@@ -43,5 +43,5 @@ namespace neura {
 std::unique_ptr<Pass> createAssignAcceleratorPass() {
   return std::make_unique<AssignAcceleratorPass>();
 }
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir

@@ -1,13 +1,18 @@
-#include <iterator>
 #include <stdlib.h>
 
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <iterator>
 #include <vector>
 
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
+#include "llvm/ADT/DenseSet.h"
+#include "llvm/Support/Casting.h"
+#include "llvm/Support/Format.h"
+#include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/AsmState.h"
@@ -16,11 +21,6 @@
 #include "mlir/IR/Operation.h"
 #include "mlir/Parser/Parser.h"
 #include "mlir/Support/FileUtilities.h"
-#include "llvm/ADT/DenseSet.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/raw_ostream.h"
 
 using namespace mlir;
 
@@ -50,8 +50,12 @@ struct PredicatedData {
    * false.
    */
   PredicatedData()
-      : value{0.0f}, predicate{true}, is_vector{false}, vector_data{},
-        is_reserve{false}, is_updated{false} {}
+      : value{0.0f},
+        predicate{true},
+        is_vector{false},
+        vector_data{},
+        is_reserve{false},
+        is_updated{false} {}
 
   /**
    * @brief Compares this PredicatedData instance with another to check for
@@ -226,8 +230,8 @@ std::vector<Operation *> DependencyGraph::getReadyToExecuteOperations() {
   return executable_ops;
 }
 
-std::vector<Operation *>
-DependencyGraph::getReadyToExecuteConsumerOperations(Operation *op) {
+std::vector<Operation *> DependencyGraph::getReadyToExecuteConsumerOperations(
+    Operation *op) {
   std::vector<Operation *> dependent_ops;
   for (Value result : op->getResults()) {
     for (Operation *user : result.getUsers()) {
@@ -985,7 +989,7 @@ bool handleFMaxOp(
     } else {
       result_float = std::max(lhs_float, rhs_float);
     }
-  } else { // "maximum"
+  } else {  // "maximum"
     // maximum semantic: propagate NaN when any operand is NaN
     if (std::isnan(lhs_float) || std::isnan(rhs_float)) {
       result_float = std::nan("");
@@ -1082,7 +1086,7 @@ bool handleFMinOp(
     } else {
       result_float = std::min(lhs_float, rhs_float);
     }
-  } else { // "minimum"
+  } else {  // "minimum"
     // minimum semantic: propagate NaN when any operand is NaN
     if (std::isnan(lhs_float) || std::isnan(rhs_float)) {
       result_float = std::nan("");
@@ -2856,7 +2860,7 @@ bool handlePhiOp(
       llvm::errs() << "[neura-interpreter]  └─ Error: No inputs provided "
                       "(execution failed)\n";
     }
-    return false; // No inputs is a failure in both modes.
+    return false;  // No inputs is a failure in both modes.
   }
 
   // Stores the finally selected input data.
@@ -2957,7 +2961,7 @@ bool handlePhiOp(
       }
     }
 
-  } else { // DataFlow mode
+  } else {  // DataFlow mode
     // DataFlow mode: Selects first valid input (with true predicate).
     bool found_valid_input = false;
     for (size_t i = 0; i < input_count; ++i) {
@@ -3004,7 +3008,7 @@ bool handlePhiOp(
       }
     }
     selection_success =
-        true; // DataFlow mode always considers selection successful.
+        true;  // DataFlow mode always considers selection successful.
 
     // DataFlow mode: Logs input values.
     if (isVerboseMode()) {
@@ -3270,7 +3274,7 @@ bool handleNeuraReturnOp(
     results.push_back(value_to_predicated_data_map[val]);
     if (!value_to_predicated_data_map[val].predicate) {
       has_valid_result = false;
-      break; // If any return value is invalid, do not terminate.
+      break;  // If any return value is invalid, do not terminate.
     }
   }
 
@@ -3285,8 +3289,7 @@ bool handleNeuraReturnOp(
         for (size_t j = 0; j < data.vector_data.size(); ++j) {
           float val = data.predicate ? data.vector_data[j] : 0.0f;
           llvm::outs() << llvm::format("%.6f", val);
-          if (j != data.vector_data.size() - 1)
-            llvm::outs() << ", ";
+          if (j != data.vector_data.size() - 1) llvm::outs() << ", ";
         }
         llvm::outs() << "]";
       } else {
@@ -3637,7 +3640,7 @@ OperationHandleResult handleOperation(
     if (current_block && last_visited_block) {
       result.success = handleBrOp(br_op, value_to_predicated_data_map,
                                   *current_block, *last_visited_block);
-      result.is_branch = true; // Marks as branch to reset index.
+      result.is_branch = true;  // Marks as branch to reset index.
     } else {
       result.success = false;
     }
@@ -3992,8 +3995,7 @@ int run(func::FuncOp func,
     // Main loop: processes operations sequentially through blocks.
     while (!is_terminated && current_block) {
       auto &operations = current_block->getOperations();
-      if (op_index >= operations.size())
-        break;
+      if (op_index >= operations.size()) break;
 
       Operation &op = *std::next(operations.begin(), op_index);
       // Processes operation with block information for control flow handling.

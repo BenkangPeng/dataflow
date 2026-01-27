@@ -1,16 +1,17 @@
 #ifndef NEURA_HEURISTIC_MAPPING_H
 #define NEURA_HEURISTIC_MAPPING_H
 
+#include <climits>
+#include <set>
+
 #include "NeuraDialect/Mapping/Mapping.h"
 #include "NeuraDialect/Mapping/MappingState.h"
 #include "NeuraDialect/NeuraAttributes.h"
-#include <climits>
-#include <set>
 
 namespace mlir {
 namespace neura {
 class HeuristicMapping : public Mapping {
-public:
+ public:
   HeuristicMapping(int max_location_to_try = 500, int max_backtrack_depth = 20)
       : max_location_to_try(max_location_to_try),
         max_backtrack_depth(max_backtrack_depth) {}
@@ -33,7 +34,7 @@ public:
     }
   }
 
-private:
+ private:
   bool mapWithBacktrack(
       std::vector<std::pair<Operation *, int>> &sorted_ops_with_levels,
       std::set<Operation *> &critical_ops, const Architecture &architecture,
@@ -41,10 +42,9 @@ private:
 
   // Gets the sorted candidate locations for a given operation based on spatial
   // execution model.
-  std::vector<MappingLoc>
-  calculateSpatialAward(Operation *op, std::set<Operation *> &critical_ops,
-                        int target_level, const Architecture &architecture,
-                        const MappingState &mapping_state);
+  std::vector<MappingLoc> calculateSpatialAward(
+      Operation *op, std::set<Operation *> &critical_ops, int target_level,
+      const Architecture &architecture, const MappingState &mapping_state);
 
   // Configuration parameters.
   // Maximum number of locations to try for each op.
@@ -52,7 +52,7 @@ private:
   // Maximum depth for backtracking.
   int max_backtrack_depth;
 };
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
-#endif // NEURA_HEURISTIC_MAPPING_H
+#endif  // NEURA_HEURISTIC_MAPPING_H

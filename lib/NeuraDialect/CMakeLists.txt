@@ -17,7 +17,7 @@ add_mlir_dialect_library(MLIRNeura
         DEPENDS
         MLIRNeuraTransformsIncGen
         MLIRConversionIncGen
-        
+
         LINK_LIBS PUBLIC
         MLIRIR
         MLIRSupport

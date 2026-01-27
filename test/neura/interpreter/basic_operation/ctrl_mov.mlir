@@ -3,11 +3,11 @@
 func.func @test_ctrl_mov_basic() {
   %a = "neura.reserve"() : () -> (i32)
   %const = arith.constant 42 : i32
-  
+
   "neura.ctrl_mov"(%const, %a) : (i32, i32) -> ()
-  
+
   // CHECK: [neura-interpreter]  → Output: (void)
-  
+
   return
 }
 

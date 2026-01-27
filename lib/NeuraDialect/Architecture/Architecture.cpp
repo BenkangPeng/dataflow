@@ -1,11 +1,13 @@
 #include "NeuraDialect/Architecture/Architecture.h"
-#include "NeuraDialect/Architecture/ArchitectureSpec.h"
-#include "llvm/Support/raw_ostream.h"
+
 #include <algorithm>
 #include <cassert>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "NeuraDialect/Architecture/ArchitectureSpec.h"
+#include "llvm/Support/raw_ostream.h"
 
 using namespace mlir;
 using namespace mlir::neura;
@@ -240,8 +242,8 @@ void RegisterFileCluster::addRegisterFile(RegisterFile *register_file) {
   register_file->setRegisterFileCluster(this);
 }
 
-const std::map<int, RegisterFile *> &
-RegisterFileCluster::getRegisterFiles() const {
+const std::map<int, RegisterFile *> &RegisterFileCluster::getRegisterFiles()
+    const {
   return this->register_files;
 }
 
@@ -266,7 +268,7 @@ void Architecture::initializeTiles(int per_cgra_rows, int per_cgra_columns) {
 void Architecture::createRegisterFileCluster(
     Tile *tile, int num_registers, int &num_already_assigned_global_registers,
     int global_id_start) {
-  const int k_num_regs_per_regfile = 8; // Keep this fixed for now.
+  const int k_num_regs_per_regfile = 8;  // Keep this fixed for now.
   const int k_num_regfiles_per_cluster = num_registers / k_num_regs_per_regfile;
 
   // Ensures global register IDs are monotonically increasing.
@@ -336,7 +338,7 @@ void Architecture::applyTileOverrides(
         // Creates new register file cluster with override capacity.
         // Note: addRegisterFileCluster handles deletion of existing cluster.
         // Uses tile ID as base to avoid conflicts with existing registers.
-        int dummy_ref = 0; // Not used when global_id_start is specified.
+        int dummy_ref = 0;  // Not used when global_id_start is specified.
         createRegisterFileCluster(tile, override.num_registers, dummy_ref,
                                   tile->getId() * 1000);
       }
@@ -362,19 +364,19 @@ void Architecture::createLinks(const LinkDefaults &link_defaults,
   int link_id = 0;
 
   switch (base_topology) {
-  case BaseTopology::MESH:
-    createMeshLinks(link_id, link_defaults);
-    break;
-  case BaseTopology::KING_MESH:
-    createKingMeshLinks(link_id, link_defaults);
-    break;
-  case BaseTopology::RING:
-    createRingLinks(link_id, link_defaults);
-    break;
-  default:
-    // Defaults to mesh if unknown topology.
-    createMeshLinks(link_id, link_defaults);
-    break;
+    case BaseTopology::MESH:
+      createMeshLinks(link_id, link_defaults);
+      break;
+    case BaseTopology::KING_MESH:
+      createKingMeshLinks(link_id, link_defaults);
+      break;
+    case BaseTopology::RING:
+      createRingLinks(link_id, link_defaults);
+      break;
+    default:
+      // Defaults to mesh if unknown topology.
+      createMeshLinks(link_id, link_defaults);
+      break;
   }
 }
 
@@ -389,7 +391,8 @@ void Architecture::createLinkIfValid(int &link_id, Tile *src_tile, int dst_x,
                                      const LinkDefaults &link_defaults) {
   if (dst_x >= 0 && dst_x < getPerCgraColumns() && dst_y >= 0 &&
       dst_y < getPerCgraRows()) {
-    // Checks if the destination tile actually exists (not removed by tile_overrides).
+    // Checks if the destination tile actually exists (not removed by
+    // tile_overrides).
     auto it = coord_to_tile_.find({dst_x, dst_y});
     if (it != coord_to_tile_.end()) {
       createSingleLink(link_id, src_tile, it->second, link_defaults);
@@ -410,10 +413,10 @@ void Architecture::createMeshLinks(int &link_id,
       Tile *tile = it->second;
 
       // Creates links to neighboring tiles with default properties.
-      createLinkIfValid(link_id, tile, i - 1, j, link_defaults); // West
-      createLinkIfValid(link_id, tile, i + 1, j, link_defaults); // East
-      createLinkIfValid(link_id, tile, i, j - 1, link_defaults); // South
-      createLinkIfValid(link_id, tile, i, j + 1, link_defaults); // North
+      createLinkIfValid(link_id, tile, i - 1, j, link_defaults);  // West
+      createLinkIfValid(link_id, tile, i + 1, j, link_defaults);  // East
+      createLinkIfValid(link_id, tile, i, j - 1, link_defaults);  // South
+      createLinkIfValid(link_id, tile, i, j + 1, link_defaults);  // North
     }
   }
 }
@@ -431,20 +434,20 @@ void Architecture::createKingMeshLinks(int &link_id,
       Tile *tile = it->second;
 
       // Creates 4-connected links (N, S, W, E).
-      createLinkIfValid(link_id, tile, i - 1, j, link_defaults); // West
-      createLinkIfValid(link_id, tile, i + 1, j, link_defaults); // East
-      createLinkIfValid(link_id, tile, i, j - 1, link_defaults); // South
-      createLinkIfValid(link_id, tile, i, j + 1, link_defaults); // North
+      createLinkIfValid(link_id, tile, i - 1, j, link_defaults);  // West
+      createLinkIfValid(link_id, tile, i + 1, j, link_defaults);  // East
+      createLinkIfValid(link_id, tile, i, j - 1, link_defaults);  // South
+      createLinkIfValid(link_id, tile, i, j + 1, link_defaults);  // North
 
       // Creates diagonal links for king mesh (NE, NW, SE, SW).
       createLinkIfValid(link_id, tile, i - 1, j - 1,
-                        link_defaults); // Southwest
+                        link_defaults);  // Southwest
       createLinkIfValid(link_id, tile, i + 1, j - 1,
-                        link_defaults); // Southeast
+                        link_defaults);  // Southeast
       createLinkIfValid(link_id, tile, i - 1, j + 1,
-                        link_defaults); // Northwest
+                        link_defaults);  // Northwest
       createLinkIfValid(link_id, tile, i + 1, j + 1,
-                        link_defaults); // Northeast
+                        link_defaults);  // Northeast
     }
   }
 }
@@ -465,10 +468,10 @@ void Architecture::createRingLinks(int &link_id,
       // Checks if tile is on the boundary.
       if (isTileOnBoundary(i, j, getPerCgraColumns(), getPerCgraRows())) {
         // Creates connections only to adjacent boundary tiles.
-        createLinkIfValid(link_id, tile, i - 1, j, link_defaults); // West
-        createLinkIfValid(link_id, tile, i + 1, j, link_defaults); // East
-        createLinkIfValid(link_id, tile, i, j - 1, link_defaults); // South
-        createLinkIfValid(link_id, tile, i, j + 1, link_defaults); // North
+        createLinkIfValid(link_id, tile, i - 1, j, link_defaults);  // West
+        createLinkIfValid(link_id, tile, i + 1, j, link_defaults);  // East
+        createLinkIfValid(link_id, tile, i, j - 1, link_defaults);  // South
+        createLinkIfValid(link_id, tile, i, j + 1, link_defaults);  // North
       }
     }
   }
@@ -491,7 +494,7 @@ void Architecture::applyLinkOverrides(
   int next_link_id = link_storage_.empty()
                          ? 0
                          : link_storage_.rbegin()->first +
-                               1; // Starts from the next available ID.
+                               1;  // Starts from the next available ID.
 
   for (const auto &override : link_overrides) {
     // TODO: Recognize the CGRA coordinates for multi-cgra when manipulate the
@@ -604,7 +607,7 @@ int Architecture::getNumTiles() const {
 void Architecture::removeTile(int tile_id) {
   auto it = tile_storage_.find(tile_id);
   if (it == tile_storage_.end() || !it->second) {
-    return; // Tile not found or already removed.
+    return;  // Tile not found or already removed.
   }
 
   Tile *tile = it->second.get();
@@ -636,7 +639,7 @@ Link *Architecture::getLink(int src_tile_x, int src_tile_y, int dst_tile_x,
   Tile *src_tile = getTile(src_tile_x, src_tile_y);
   Tile *dst_tile = getTile(dst_tile_x, dst_tile_y);
   if (!src_tile || !dst_tile) {
-    return nullptr; // One of the tiles does not exist.
+    return nullptr;  // One of the tiles does not exist.
   }
 
   for (const auto &[id, link] : link_storage_) {
@@ -678,7 +681,6 @@ void Architecture::removeLink(int link_id) {
 }
 
 void Architecture::removeLink(Tile *src_tile, Tile *dst_tile) {
-
   Link *link = nullptr;
   for (auto it = link_storage_.begin(); it != link_storage_.end(); ++it) {
     if (it->second && it->second->getSrcTile() == src_tile &&
@@ -701,7 +703,7 @@ void Architecture::removeLink(int src_tile_x, int src_tile_y, int dst_tile_x,
   Tile *src_tile = getTile(src_tile_x, src_tile_y);
   Tile *dst_tile = getTile(dst_tile_x, dst_tile_y);
   if (!src_tile || !dst_tile) {
-    return; // One of the tiles does not exist.
+    return;  // One of the tiles does not exist.
   }
   removeLink(src_tile, dst_tile);
 }

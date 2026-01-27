@@ -7,8 +7,8 @@
 namespace mlir {
 namespace taskflow {
 class TaskflowDialect;
-} // End namespace taskflow.
-} // End namespace mlir.
+}  // End namespace taskflow.
+}  // End namespace mlir.
 
 #include "TaskflowDialect/TaskflowDialect.h.inc"
-#endif // TASKFLOW_DIALECT_H
+#endif  // TASKFLOW_DIALECT_H

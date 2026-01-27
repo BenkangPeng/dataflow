@@ -55,8 +55,8 @@ constexpr llvm::StringLiteral kModePredicate = "predicate";
 constexpr llvm::StringLiteral kOpFused = "fused_op";
 constexpr llvm::StringLiteral kNeuraFusedOp = "neura.fused_op";
 
-} // namespace val
+}  // namespace val
 
-} // namespace attr
-} // namespace neura
-} // namespace mlir
+}  // namespace attr
+}  // namespace neura
+}  // namespace mlir

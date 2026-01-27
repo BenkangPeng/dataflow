@@ -2,10 +2,11 @@
 
 #ifndef CONVERSION_PASSES_H
 #define CONVERSION_PASSES_H
+#include <memory>
+
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Pass/PassRegistry.h"
-#include <memory>
 
 namespace mlir {
 
@@ -26,6 +27,6 @@ std::unique_ptr<mlir::Pass> createConvertAffineToTaskflowPass();
 #define GEN_PASS_REGISTRATION
 #include "Conversion/ConversionPasses.h.inc"
 
-} // namespace mlir
+}  // namespace mlir
 
-#endif // CONVERSION_PASSES_H
+#endif  // CONVERSION_PASSES_H

@@ -1,7 +1,17 @@
+#include <cassert>
+#include <cstddef>
+#include <memory>
+
 #include "Common/AcceleratorAttrs.h"
+#include "NeuraDialect/NeuraAttributes.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraTypes.h"
-#include "NeuraDialect/NeuraAttributes.h"
+#include "llvm/ADT/MapVector.h"
+#include "llvm/ADT/SetVector.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/LogicalResult.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/Operation.h"
@@ -10,15 +20,6 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Support/LLVM.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
-#include "llvm/ADT/MapVector.h"
-#include "llvm/ADT/SetVector.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/LogicalResult.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstddef>
-#include <memory>
 
 using namespace mlir;
 
@@ -28,17 +29,17 @@ using namespace mlir;
 namespace {
 // A class to hold loop information for the control flow fusion pass.
 class LoopInfo {
-public:
+ public:
   // Key operations in a loop.
-  Value index_reserve_val; // Reserve values for index.
+  Value index_reserve_val;  // Reserve values for index.
   Value index_phi_val;
   Value condition_val;
   Value not_condition_val;
 
   // Loop iteration parameters.
-  Value start_val; // Start value for the loop index.
-  Value end_val;   // End value for the loop index.
-  Value step_val;  // Step value for the loop index.
+  Value start_val;  // Start value for the loop index.
+  Value end_val;    // End value for the loop index.
+  Value step_val;   // Step value for the loop index.
 
   // Optional attributes for the parameters, if any.
   Attribute start_attr = nullptr;
@@ -89,7 +90,7 @@ public:
     }
   }
 
-private:
+ private:
   // Records users of a value.
   void recordUsersFor(Value val) {
     if (!val) {
@@ -152,7 +153,7 @@ std::unique_ptr<LoopInfo> identifyLoop(Operation *index_reserve_op) {
   if (!index_phi_start_op) {
     llvm::errs()
         << "[CtrlFlowFuse] No index phi operation found for the loop.\n";
-    return nullptr; // No phi operation found.
+    return nullptr;  // No phi operation found.
   }
 
   loop->index_phi_val = index_phi_start_op.getResult();
@@ -167,7 +168,7 @@ std::unique_ptr<LoopInfo> identifyLoop(Operation *index_reserve_op) {
   if (!initial_value) {
     llvm::errs()
         << "[CtrlFlowFuse] No initial value found for the loop index.\n";
-    return nullptr; // No start value found.
+    return nullptr;  // No start value found.
   }
 
   assert(initial_value && initial_value.getDefiningOp() &&
@@ -231,7 +232,7 @@ std::unique_ptr<LoopInfo> identifyLoop(Operation *index_reserve_op) {
           llvm::errs() << "[CtrlFlowFuse] Loop condition does not match "
                           "expected value.\n";
         }
-        return nullptr; // Unsupported compare type.
+        return nullptr;  // Unsupported compare type.
       }
     }
   }
@@ -239,7 +240,7 @@ std::unique_ptr<LoopInfo> identifyLoop(Operation *index_reserve_op) {
   if (!loop->condition_val || !loop->icmp_op) {
     llvm::errs() << "[CtrlFlowFuse] Incomplete loop information, condition or "
                     "ICMP operation missing.\n";
-    return nullptr; // Incomplete loop.
+    return nullptr;  // Incomplete loop.
   }
 
   // Identifies the ctrl_mov<-add pattern.
@@ -271,7 +272,7 @@ std::unique_ptr<LoopInfo> identifyLoop(Operation *index_reserve_op) {
   if (!loop->index_ctrl_mov || !loop->add_op || !loop->step_attr) {
     llvm::errs() << "[CtrlFlowFuse] Incomplete loop information: ctrl_mov or "
                     "step value not found.\n";
-    return nullptr; // Incomplete loop.
+    return nullptr;  // Incomplete loop.
   }
 
   if (loop->isComplete()) {
@@ -279,7 +280,7 @@ std::unique_ptr<LoopInfo> identifyLoop(Operation *index_reserve_op) {
     return loop;
   }
 
-  return nullptr; // Incomplete loop.
+  return nullptr;  // Incomplete loop.
 }
 
 Value createConstantPredicate(PatternRewriter &rewriter, Location loc,
@@ -319,7 +320,7 @@ LogicalResult replaceWithLoopController(LoopInfo *loop_info,
       iter_type = rewriter.getStringAttr("increment");
     } else {
       assert(false && "Unsupported compare type");
-      return failure(); // Unsupported compare type.
+      return failure();  // Unsupported compare type.
     }
   }
 
@@ -495,10 +496,10 @@ struct FuseLoopControlPass
     }
   }
 };
-} // namespace
+}  // namespace
 
 namespace mlir::neura {
 std::unique_ptr<Pass> createFuseLoopControlPass() {
   return std::make_unique<FuseLoopControlPass>();
 }
-} // namespace mlir::neura
+}  // namespace mlir::neura

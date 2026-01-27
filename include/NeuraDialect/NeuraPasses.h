@@ -3,12 +3,13 @@
 #ifndef NEURA_PASSES_H
 #define NEURA_PASSES_H
 
+#include <memory>
+
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Pass/PassRegistry.h"
-#include <memory>
 
 namespace mlir {
 namespace neura {
@@ -53,7 +54,7 @@ std::unique_ptr<mlir::Pass> createHardwareMergePass();
 #define GEN_PASS_REGISTRATION
 #include "NeuraDialect/NeuraPasses.h.inc"
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
-#endif // NEURA_PASSES_H
+#endif  // NEURA_PASSES_H

@@ -1,15 +1,16 @@
+#include "NeuraDialect/Mapping/mapping_util.h"
+
+#include <cassert>
 #include <deque>
 #include <queue>
 
-#include "NeuraDialect/Mapping/mapping_util.h"
 #include "NeuraDialect/NeuraOps.h"
-#include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/IR/Operation.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/IR/Operation.h"
 
 using namespace mlir;
 using namespace mlir::neura;
@@ -21,107 +22,71 @@ constexpr int kAwardBaseMultiplier = 1;
 constexpr int kAwardCriticalBonusDiv = 1;
 
 // Congestion penalty coefficients (tunable).
-constexpr int kStrongCongestionPenalty = 60; // used for high fan-in ops (>=3)
-constexpr int kWeakCongestionPenalty = 15;   // used for low fan-in ops
+constexpr int kStrongCongestionPenalty = 60;  // used for high fan-in ops (>=3)
+constexpr int kWeakCongestionPenalty = 15;    // used for low fan-in ops
 
 namespace mlir {
 namespace neura {
 OperationKind getOperationKindFromMlirOp(Operation *op) {
   // Integer arithmetic operations
-  if (isa<neura::AddOp>(op))
-    return IAdd;
-  if (isa<neura::SubOp>(op))
-    return ISub;
-  if (isa<neura::MulOp>(op))
-    return IMul;
-  if (isa<neura::DivOp>(op))
-    return IDiv;
-  if (isa<neura::RemOp>(op))
-    return IRem;
+  if (isa<neura::AddOp>(op)) return IAdd;
+  if (isa<neura::SubOp>(op)) return ISub;
+  if (isa<neura::MulOp>(op)) return IMul;
+  if (isa<neura::DivOp>(op)) return IDiv;
+  if (isa<neura::RemOp>(op)) return IRem;
 
   // Floating-point arithmetic operations
-  if (isa<neura::FAddOp>(op))
-    return FAdd;
-  if (isa<neura::FSubOp>(op))
-    return FSub;
-  if (isa<neura::FMulOp>(op))
-    return FMul;
-  if (isa<neura::FDivOp>(op))
-    return FDiv;
+  if (isa<neura::FAddOp>(op)) return FAdd;
+  if (isa<neura::FSubOp>(op)) return FSub;
+  if (isa<neura::FMulOp>(op)) return FMul;
+  if (isa<neura::FDivOp>(op)) return FDiv;
 
   // Memory operations
-  if (isa<neura::LoadOp>(op))
-    return ILoad;
-  if (isa<neura::StoreOp>(op))
-    return IStore;
-  if (isa<neura::LoadIndexedOp>(op))
-    return ILoadIndexed;
-  if (isa<neura::StoreIndexedOp>(op))
-    return IStoreIndexed;
-  if (isa<neura::AllocaOp>(op))
-    return IAlloca;
+  if (isa<neura::LoadOp>(op)) return ILoad;
+  if (isa<neura::StoreOp>(op)) return IStore;
+  if (isa<neura::LoadIndexedOp>(op)) return ILoadIndexed;
+  if (isa<neura::StoreIndexedOp>(op)) return IStoreIndexed;
+  if (isa<neura::AllocaOp>(op)) return IAlloca;
 
   // Logical operations
-  if (isa<neura::OrOp>(op))
-    return IOr;
-  if (isa<neura::NotOp>(op))
-    return INot;
-  if (isa<neura::ICmpOp>(op))
-    return ICmp;
-  if (isa<neura::FCmpOp>(op))
-    return FCmp;
-  if (isa<neura::SelOp>(op))
-    return ISel;
+  if (isa<neura::OrOp>(op)) return IOr;
+  if (isa<neura::NotOp>(op)) return INot;
+  if (isa<neura::ICmpOp>(op)) return ICmp;
+  if (isa<neura::FCmpOp>(op)) return FCmp;
+  if (isa<neura::SelOp>(op)) return ISel;
 
   // Type conversion operations
-  if (isa<neura::CastOp>(op))
-    return ICast;
-  if (isa<neura::SExtOp>(op))
-    return ISExt;
-  if (isa<neura::ZExtOp>(op))
-    return IZExt;
-  if (isa<neura::ShlOp>(op))
-    return IShl;
+  if (isa<neura::CastOp>(op)) return ICast;
+  if (isa<neura::SExtOp>(op)) return ISExt;
+  if (isa<neura::ZExtOp>(op)) return IZExt;
+  if (isa<neura::ShlOp>(op)) return IShl;
 
   // Vector operations
-  if (isa<neura::VFMulOp>(op))
-    return VFMul;
+  if (isa<neura::VFMulOp>(op)) return VFMul;
 
   // Fused operations
-  if (isa<neura::FAddFAddOp>(op))
-    return FAddFAdd;
-  if (isa<neura::FMulFAddOp>(op))
-    return FMulFAdd;
+  if (isa<neura::FAddFAddOp>(op)) return FAddFAdd;
+  if (isa<neura::FMulFAddOp>(op)) return FMulFAdd;
 
   // Control flow operations
-  if (isa<neura::ReturnOp>(op))
-    return IReturn;
-  if (isa<neura::PhiOp>(op))
-    return IPhi;
+  if (isa<neura::ReturnOp>(op)) return IReturn;
+  if (isa<neura::PhiOp>(op)) return IPhi;
 
   // Data movement operations
-  if (isa<neura::DataMovOp>(op))
-    return IDataMov;
-  if (isa<neura::CtrlMovOp>(op))
-    return ICtrlMov;
+  if (isa<neura::DataMovOp>(op)) return IDataMov;
+  if (isa<neura::CtrlMovOp>(op)) return ICtrlMov;
 
   // Predicate operations
-  if (isa<neura::ReserveOp>(op))
-    return IReserve;
-  if (isa<neura::GrantPredicateOp>(op))
-    return IGrantPredicate;
-  if (isa<neura::GrantOnceOp>(op))
-    return IGrantOnce;
-  if (isa<neura::GrantAlwaysOp>(op))
-    return IGrantAlways;
+  if (isa<neura::ReserveOp>(op)) return IReserve;
+  if (isa<neura::GrantPredicateOp>(op)) return IGrantPredicate;
+  if (isa<neura::GrantOnceOp>(op)) return IGrantOnce;
+  if (isa<neura::GrantAlwaysOp>(op)) return IGrantAlways;
 
   // Loop control operations
-  if (isa<neura::LoopControlOp>(op))
-    return ILoopControl;
+  if (isa<neura::LoopControlOp>(op)) return ILoopControl;
 
   // Constant operations
-  if (isa<neura::ConstantOp>(op))
-    return IConstant;
+  if (isa<neura::ConstantOp>(op)) return IConstant;
 
   // Default fallback
   return IAdd;
@@ -134,8 +99,8 @@ bool is_non_materialized(Operation *op) {
                    neura::YieldOp>(op);
 }
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
 namespace {
 // Traverses (backward) the operation graph starting from the given operation
@@ -188,10 +153,10 @@ void traverseAlongPath(Operation *op, Value reserve_value,
   visited_in_path.erase(op);
 }
 
-} // namespace
+}  // namespace
 
-SmallVector<RecurrenceCycle, 4>
-mlir::neura::collectRecurrenceCycles(Operation *func_op) {
+SmallVector<RecurrenceCycle, 4> mlir::neura::collectRecurrenceCycles(
+    Operation *func_op) {
   SmallVector<RecurrenceCycle, 4> recurrence_cycles;
 
   func_op->walk([&](neura::CtrlMovOp ctrl_mov_op) {
@@ -253,8 +218,8 @@ int mlir::neura::calculateResMii(Operation *func_op,
   return llvm::divideCeil(num_ops, num_tiles);
 }
 
-std::vector<Operation *>
-mlir::neura::getTopologicallySortedOps(Operation *func_op) {
+std::vector<Operation *> mlir::neura::getTopologicallySortedOps(
+    Operation *func_op) {
   std::vector<Operation *> sorted_ops;
   llvm::DenseMap<Operation *, int> pending_deps;
   std::deque<Operation *> ready_queue;
@@ -316,9 +281,9 @@ mlir::neura::getTopologicallySortedOps(Operation *func_op) {
   return sorted_ops;
 }
 
-std::vector<std::vector<Operation *>>
-mlir::neura::getOpsInAlapLevels(const std::vector<Operation *> &sorted_ops,
-                                const std::set<Operation *> &critical_ops) {
+std::vector<std::vector<Operation *>> mlir::neura::getOpsInAlapLevels(
+    const std::vector<Operation *> &sorted_ops,
+    const std::set<Operation *> &critical_ops) {
   llvm::DenseMap<Operation *, int> op_level;
   int max_level = 0;
 
@@ -417,14 +382,14 @@ std::vector<std::pair<Operation *, int>> mlir::neura::flatten_level_buckets(
                               const std::pair<Operation *, int> &b_pair) {
                 Operation *a = a_pair.first;
                 Operation *b = b_pair.first;
-                
+
                 bool a_is_critical = critical_ops.count(a) > 0;
                 bool b_is_critical = critical_ops.count(b) > 0;
-                
+
                 // Priority 1: Critical ops come first (within same ALAP level).
                 if (a_is_critical != b_is_critical)
                   return a_is_critical > b_is_critical;
-                
+
                 // Priority 2: Degree (connectivity) - higher degree first.
                 int degree_a = a->getNumOperands();
                 int degree_b = b->getNumOperands();
@@ -436,9 +401,8 @@ std::vector<std::pair<Operation *, int>> mlir::neura::flatten_level_buckets(
                   degree_b += std::distance(res.getUsers().begin(),
                                             res.getUsers().end());
                 }
-                if (degree_a != degree_b)
-                  return degree_a > degree_b;
-                
+                if (degree_a != degree_b) return degree_a > degree_b;
+
                 // Priority 3: Original index (stability tie-breaker).
                 return a_pair.second < b_pair.second;
               });
@@ -478,8 +442,8 @@ mlir::Operation *mlir::neura::getMaterializedBackwardUser(Operation *op) {
          "No materialized backward user (i.e., phi) found for ctrl_mov");
 }
 
-llvm::SmallVector<mlir::Operation *>
-mlir::neura::getMaterializedUserOps(Operation *op) {
+llvm::SmallVector<mlir::Operation *> mlir::neura::getMaterializedUserOps(
+    Operation *op) {
   llvm::SmallVector<Operation *> result;
   llvm::DenseSet<Operation *> visited;
   visited.insert(op);
@@ -614,16 +578,16 @@ bool mlir::neura::tryRouteDataMove(Operation *mov_op, MappingLoc src_loc,
   // Search state: records current tile, time step, and path to reach this
   // state.
   struct SearchState {
-    Tile *current_tile; // Current tile location.
-    int current_time;   // Current time step.
+    Tile *current_tile;  // Current tile location.
+    int current_time;    // Current time step.
     std::vector<MappingLoc>
-        path; // Routing resource path to reach current state.
+        path;  // Routing resource path to reach current state.
   };
 
   // BFS search.
   std::queue<SearchState> search_queue;
   std::set<std::pair<Tile *, int>>
-      visited; // Records visited (tile, time) combinations.
+      visited;  // Records visited (tile, time) combinations.
 
   // Initial state: starts from source tile.
   search_queue.push({src_tile, src_loc.time_step, {}});
@@ -651,7 +615,7 @@ bool mlir::neura::tryRouteDataMove(Operation *mov_op, MappingLoc src_loc,
             llvm::outs() << "[tryRouteDataMove] Cannot find available waiting"
                             "register on destination Tile#"
                          << dst_tile->getId() << "\n";
-            continue; // Tries other paths.
+            continue;  // Tries other paths.
           }
 
           // Builds complete path.
@@ -744,7 +708,6 @@ Operation *mlir::neura::getMaterializedProducer(Value operand) {
 int mlir::neura::getPhysicalHops(const std::vector<Operation *> &producers,
                                  Tile *tile,
                                  const MappingState &mapping_state) {
-
   // Counts the number of physical hops from the producers to the tile.
   int hops = 0;
 
@@ -766,7 +729,6 @@ bool mlir::neura::canReachLocInTime(const std::vector<Operation *> &producers,
                                     const MappingLoc &target_loc,
                                     int deadline_step,
                                     const MappingState &mapping_state) {
-
   for (Operation *producer : producers) {
     // Get the last location of the producer.
     auto producer_locs = mapping_state.getAllLocsOfOp(producer);
@@ -877,10 +839,9 @@ void mlir::neura::updateAward(std::map<MappingLoc, int> &locs_with_award,
   }
 }
 
-std::vector<MappingLoc>
-mlir::neura::calculateAward(Operation *op, std::set<Operation *> &critical_ops,
-                            int target_level, const Architecture &architecture,
-                            const MappingState &mapping_state) {
+std::vector<MappingLoc> mlir::neura::calculateAward(
+    Operation *op, std::set<Operation *> &critical_ops, int target_level,
+    const Architecture &architecture, const MappingState &mapping_state) {
   // Early exit if the operation is not supported by all the tiles.
   bool op_can_be_supported = false;
   for (Tile *tile : architecture.getAllTiles()) {
@@ -931,7 +892,7 @@ mlir::neura::calculateAward(Operation *op, std::set<Operation *> &critical_ops,
       llvm::errs() << "[calculateAward] Tile<" << tile->getX() << ", "
                    << tile->getY() << "> does not support operation: " << *op
                    << "\n";
-      continue; // Skip tiles that cannot support the operation.
+      continue;  // Skip tiles that cannot support the operation.
     }
     int earliest_start_time_step = target_level;
     for (Operation *producer : producers) {
@@ -976,8 +937,8 @@ mlir::neura::calculateAward(Operation *op, std::set<Operation *> &critical_ops,
       if (backward_tile) {
         int backward_hops = std::abs(backward_tile->getX() - tile->getX()) +
                             std::abs(backward_tile->getY() - tile->getY());
-        tile_award += std::max(0, (kMaxDist - backward_hops) *
-                                      kAwardBackwardProximityScale);
+        tile_award += std::max(
+            0, (kMaxDist - backward_hops) * kAwardBackwardProximityScale);
       }
     }
 
@@ -1003,10 +964,10 @@ mlir::neura::calculateAward(Operation *op, std::set<Operation *> &critical_ops,
         bool meet_backward_user_constraint = true;
         for (auto &backward_user_loc : backward_users_locs) {
           // Checks if the location can reach all backward users.
-          if (!canReachLocInTime(tile_loc_candidate, backward_user_loc,
-                                 backward_user_loc.time_step +
-                                     mapping_state.getII(),
-                                 mapping_state)) {
+          if (!canReachLocInTime(
+                  tile_loc_candidate, backward_user_loc,
+                  backward_user_loc.time_step + mapping_state.getII(),
+                  mapping_state)) {
             meet_backward_user_constraint = false;
             break;
           }
@@ -1036,18 +997,22 @@ mlir::neura::calculateAward(Operation *op, std::set<Operation *> &critical_ops,
           }
 
           float in_ratio = (total_in > 0) ? (float)occupied_in / total_in : 0;
-          float out_ratio = (total_out > 0) ? (float)occupied_out / total_out : 0;
-          
+          float out_ratio =
+              (total_out > 0) ? (float)occupied_out / total_out : 0;
+
           // Adaptive penalty strategy:
-          // - Use very strong penalty (60) only for high fan-in ops (>= 3 producers)
+          // - Use very strong penalty (60) only for high fan-in ops (>= 3
+          // producers)
           // - Use weak penalty (15) for low fan-in ops
-          // This optimizes fuse-pattern (II=11 target) without breaking iter-merge
+          // This optimizes fuse-pattern (II=11 target) without breaking
+          // iter-merge
           int base_penalty_coeff = (producers.size() >= 3)
                                        ? kStrongCongestionPenalty
                                        : kWeakCongestionPenalty;
-          
-          int congestion_penalty = static_cast<int>(in_ratio * in_ratio * base_penalty_coeff) +
-                                   static_cast<int>(out_ratio * out_ratio * base_penalty_coeff);
+
+          int congestion_penalty =
+              static_cast<int>(in_ratio * in_ratio * base_penalty_coeff) +
+              static_cast<int>(out_ratio * out_ratio * base_penalty_coeff);
 
           int total_award = tile_award + time_bonus - congestion_penalty;
           updateAward(locs_with_award, tile_loc_candidate, total_award);
@@ -1062,15 +1027,13 @@ mlir::neura::calculateAward(Operation *op, std::set<Operation *> &critical_ops,
 
   // Sorts by award (descending). Use stable sort/tie-breaker logic
   // to minimize noise in mapping results.
-  std::sort(
-      locs_award_vec.begin(), locs_award_vec.end(),
-      [](const std::pair<MappingLoc, int> &a,
-         const std::pair<MappingLoc, int> &b) {
-        if (a.second != b.second)
-          return a.second > b.second;
-        // Tie-breaker: earlier time step first.
-        return a.first.time_step < b.first.time_step;
-      });
+  std::sort(locs_award_vec.begin(), locs_award_vec.end(),
+            [](const std::pair<MappingLoc, int> &a,
+               const std::pair<MappingLoc, int> &b) {
+              if (a.second != b.second) return a.second > b.second;
+              // Tie-breaker: earlier time step first.
+              return a.first.time_step < b.first.time_step;
+            });
   // TODO: Needs to handle tie case and prioritize lower resource utilization,
   // however, compiled II becomes worse after adding this tie-breaker:
   // https://github.com/coredac/dataflow/issues/59.
@@ -1094,8 +1057,7 @@ mlir::neura::calculateAward(Operation *op, std::set<Operation *> &critical_ops,
   // Extracts just the MappingLocs, already sorted by award.
   std::vector<MappingLoc> sorted_locs;
   sorted_locs.reserve(locs_award_vec.size());
-  for (const auto &pair : locs_award_vec)
-    sorted_locs.push_back(pair.first);
+  for (const auto &pair : locs_award_vec) sorted_locs.push_back(pair.first);
 
   return sorted_locs;
 }

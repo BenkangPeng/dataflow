@@ -86,4 +86,3 @@ module attributes {} {
  // CHECK-NEXT:     return
  // CHECK-NEXT:   }
  // CHECK-NEXT: }
-

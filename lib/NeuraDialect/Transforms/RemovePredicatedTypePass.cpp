@@ -3,11 +3,11 @@
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraPasses.h"
 #include "NeuraDialect/NeuraTypes.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
-#include "llvm/Support/raw_ostream.h"
 
 using namespace mlir;
 
@@ -65,7 +65,7 @@ struct RemovePredicatedTypePass
     });
   }
 
-private:
+ private:
   // Gets operations in topological order.
   void getOperationsInTopologicalOrder(FunctionOpInterface func,
                                        SmallVector<Operation *> &ordered_ops) {
@@ -145,7 +145,7 @@ private:
   }
 };
 
-} // namespace
+}  // namespace
 
 namespace mlir {
 namespace neura {
@@ -154,5 +154,5 @@ std::unique_ptr<Pass> createRemovePredicatedTypePass() {
   return std::make_unique<RemovePredicatedTypePass>();
 }
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir

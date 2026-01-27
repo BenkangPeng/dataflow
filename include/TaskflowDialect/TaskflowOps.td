@@ -85,7 +85,7 @@ def TaskflowYieldOp : TaskflowOpBase<"yield", [Terminator, Pure, ReturnLike, Att
   let description = [{
     Yields values from a task body. The number and types of operands
     must match the result types of the parent taskflow.task operation.
-    
+
     Example:
       taskflow.task "Task_0" (%arg0, %arg1) {
         ...

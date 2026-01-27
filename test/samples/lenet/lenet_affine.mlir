@@ -247,4 +247,3 @@ module {
     return %11 : tensor<1x10xf32>
   }
 }
-

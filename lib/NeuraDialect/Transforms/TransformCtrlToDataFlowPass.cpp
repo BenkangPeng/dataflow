@@ -1,9 +1,15 @@
+#include <cassert>
+#include <memory>
+
 #include "Common/AcceleratorAttrs.h"
 #include "NeuraDialect/NeuraAttributes.h"
 #include "NeuraDialect/NeuraDialect.h"
 #include "NeuraDialect/NeuraOps.h"
 #include "NeuraDialect/NeuraPasses.h"
 #include "NeuraDialect/NeuraTypes.h"
+#include "llvm/ADT/MapVector.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/IR/Block.h"
@@ -13,11 +19,6 @@
 #include "mlir/IR/Value.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Support/LLVM.h"
-#include "llvm/ADT/MapVector.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <memory>
 
 using namespace mlir;
 
@@ -91,21 +92,21 @@ struct ControlFlowInfo {
   struct Edge {
     Block *source;
     Block *target;
-    Value condition; // Optional condition for the edge.
+    Value condition;  // Optional condition for the edge.
     bool is_not_condition;
-    SmallVector<Value> passed_values; // Values passed to the target block.
+    SmallVector<Value> passed_values;  // Values passed to the target block.
     bool is_back_edge;
   };
-  SmallVector<std::unique_ptr<Edge>> all_edges; // All edges in the function.
+  SmallVector<std::unique_ptr<Edge>> all_edges;  // All edges in the function.
   llvm::MapVector<Block *, SmallVector<Edge *>>
-      incoming_edges; // Incoming edges for each block.
+      incoming_edges;  // Incoming edges for each block.
   llvm::MapVector<Block *, SmallVector<Edge *>>
-      outgoing_edges; // Outgoing edges for each block.
+      outgoing_edges;  // Outgoing edges for each block.
 
   llvm::MapVector<Block *, SmallVector<Edge *>> back_edges;
   llvm::MapVector<Block *, SmallVector<Edge *>> forward_edges;
   llvm::SmallVector<Block *>
-      blocks_with_back_edges; // Blocks with backward edges.
+      blocks_with_back_edges;  // Blocks with backward edges.
 
   Edge *createEdge() {
     all_edges.push_back(std::make_unique<Edge>());
@@ -143,8 +144,9 @@ void assertLiveOutValuesDominatedByBlockArgs(Region &region) {
     DenseSet<Value> dominated_values;
 
     if (block.getNumArguments() == 0 && !live_out_values.empty()) {
-      assert(false && "Block without arguments has live-out values, please "
-                      "enable the --canonicalize-live-in pass.");
+      assert(false &&
+             "Block without arguments has live-out values, please "
+             "enable the --canonicalize-live-in pass.");
     }
 
     for (BlockArgument arg : block.getArguments()) {
@@ -243,7 +245,7 @@ void buildControlFlowInfo(Region &region, ControlFlowInfo &ctrl_info,
       ControlFlowInfo::Edge *edge = ctrl_info.createEdge();
       edge->source = &block;
       edge->target = dest;
-      edge->condition = nullptr; // No condition for Br.
+      edge->condition = nullptr;  // No condition for Br.
       edge->is_not_condition = false;
       edge->is_back_edge = dom_info.dominates(dest, &block);
       for (Value passed_value : br.getArgs()) {
@@ -482,7 +484,6 @@ void createReserveAndPhiOps(
 void transformControlFlowToDataFlow(Region &region, ControlFlowInfo &ctrl_info,
                                     DominanceInfo &dom_info,
                                     OpBuilder &builder) {
-
   // Asserts that all live-out values are dominated by block arguments.
   assertLiveOutValuesDominatedByBlockArgs(region);
 
@@ -737,10 +738,10 @@ struct TransformCtrlToDataFlowPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 namespace mlir::neura {
 std::unique_ptr<mlir::Pass> createTransformCtrlToDataFlowPass() {
   return std::make_unique<TransformCtrlToDataFlowPass>();
 }
-} // namespace mlir::neura
+}  // namespace mlir::neura

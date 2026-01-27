@@ -17,7 +17,7 @@
 // RUN:   --insert-data-mov \
 // RUN:   --map-to-accelerator="mapping-strategy=heuristic" \
 // RUN:   --architecture-spec=%S/../../arch_spec/architecture.yaml \
-// RUN:   --generate-code -o %t-mapping.mlir 
+// RUN:   --generate-code -o %t-mapping.mlir
 // RUN: FileCheck %s --input-file=%t-mapping.mlir --check-prefix=MAPPING
 // RUN: FileCheck %s --input-file=tmp-generated-instructions.yaml --check-prefix=YAML
 // RUN: FileCheck %s --input-file=tmp-generated-instructions.asm --check-prefix=ASM
@@ -183,5 +183,3 @@
 // ASM-NEXT: {
 // ASM-NEXT:   PHI_START, [$0], [EAST, RED] -> [$0], [$1] (t=1, inv_iters=0)
 // ASM-NEXT: } (idx_per_ii=1)
-
-

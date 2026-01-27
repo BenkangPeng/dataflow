@@ -16,7 +16,7 @@
 // RUN:   --insert-data-mov \
 // RUN:   --map-to-accelerator="mapping-strategy=heuristic" \
 // RUN:   --architecture-spec=../../arch_spec/architecture.yaml \
-// RUN:   --generate-code -o %t-mapping.mlir 
+// RUN:   --generate-code -o %t-mapping.mlir
 // RUN: FileCheck %s --input-file=%t-mapping.mlir -check-prefix=MAPPING
 // RUN: cp tmp-generated-instructions.yaml %t-generated-instructions.yaml
 // RUN: cp tmp-generated-instructions.asm %t-generated-instructions.asm

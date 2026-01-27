@@ -7,4 +7,3 @@ int main() {
   std::printf("Golden output: %f\n", result);
   return 0;
 }
-

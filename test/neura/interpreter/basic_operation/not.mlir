@@ -27,4 +27,3 @@ func.func @test_not_one() -> i32 {
   // CHECK: [neura-interpreter]  → Output: 0.000000
   return %res : i32
 }
-    

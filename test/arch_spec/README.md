@@ -7,7 +7,7 @@ This directory contains a specialized 4x4 CGRA (Coarse-Grained Reconfigurable Ar
 The `architecture.yaml` file defines a simplified 4x4 NeuraCGRA architecture that provides a consistent testing environment for various test suites including:
 
 - `code_gen` - Code generation tests
-- `mapping_quality` - Mapping quality evaluation tests  
+- `mapping_quality` - Mapping quality evaluation tests
 - `neura` - Neura dialect tests
 - `controflow_fuse` - Control flow fusion tests
 
@@ -25,7 +25,7 @@ The `architecture.yaml` file defines a simplified 4x4 NeuraCGRA architecture tha
 
 Each tile has 32 registers allocated as follows:
 - Tile 0: registers 0-31
-- Tile 1: registers 32-63  
+- Tile 1: registers 32-63
 - Tile 2: registers 64-95
 - And so on...
 
@@ -55,7 +55,7 @@ mlir-neura-opt input.mlir \
 When using this architecture specification from different test directories, use the appropriate relative path:
 
 - From `test/`: `arch_spec/architecture.yaml`
-- From `test/code_gen/`: `../arch_spec/architecture.yaml`  
+- From `test/code_gen/`: `../arch_spec/architecture.yaml`
 - From `test/neura/ctrl/`: `../../arch_spec/architecture.yaml`
 
 ## Benefits

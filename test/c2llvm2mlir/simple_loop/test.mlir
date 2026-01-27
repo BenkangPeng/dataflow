@@ -72,7 +72,7 @@
 // CHECK-LLVM2NEURA-MAP-SAME:  accelerator = "neura"
 // CHECK-LLVM2NEURA-MAP-SAME:  dataflow_mode = "predicate"
 // CHECK-LLVM2NEURA-MAP-SAME:  mapping_info = {
-// CHECK-LLVM2NEURA-MAP-SAME:   compiled_ii = 5 : i32, 
+// CHECK-LLVM2NEURA-MAP-SAME:   compiled_ii = 5 : i32,
 // CHECK-LLVM2NEURA-MAP-SAME:   mapping_mode = "spatial-temporal"
 // CHECK-LLVM2NEURA-MAP-SAME:   mapping_strategy = "heuristic"
 // CHECK-LLVM2NEURA-MAP-SAME:   rec_mii = 5 : i32

@@ -1,7 +1,7 @@
 #include "TaskflowDialect/TaskflowDialect.h"
 #include "TaskflowDialect/TaskflowOps.h"
 #include "TaskflowDialect/TaskflowPasses.h"
-
+#include "llvm/ADT/SmallVector.h"
 #include "mlir/Conversion/AffineToStandard/AffineToStandard.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
@@ -15,7 +15,6 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Support/LLVM.h"
 #include "mlir/Transforms/DialectConversion.h"
-#include "llvm/ADT/SmallVector.h"
 
 using namespace mlir;
 using namespace mlir::taskflow;
@@ -69,7 +68,7 @@ struct AccessInfo {
 //----------------------------------------------------------------------
 // This class is used to collects all counters needed by a hyperblock.
 class CounterCollector {
-public:
+ public:
   void collect(TaskflowHyperblockOp hyperblock) {
     for (Value idx : hyperblock.getIndices()) {
       collectRecursively(idx);
@@ -86,7 +85,7 @@ public:
     return result;
   }
 
-private:
+ private:
   // Collects counters recursively.
   void collectRecursively(Value idx) {
     TaskflowCounterOp counter = idx.getDefiningOp<TaskflowCounterOp>();
@@ -130,7 +129,7 @@ private:
 // }
 // resolveToSource(%arg0) -> %buf_input
 class BlockArgResolver {
-public:
+ public:
   explicit BlockArgResolver(TaskflowTaskOp task) {
     Block *body = &task.getBody().front();
 
@@ -163,7 +162,7 @@ public:
     return it != this->source_to_block_arg.end() ? it->second : Value();
   }
 
-private:
+ private:
   // Maps block argument to its source value.
   DenseMap<Value, Value> block_arg_to_source;
   // Maps source value to its block argument.
@@ -175,11 +174,13 @@ private:
 //----------------------------------------------------------------------
 // This class builds an atomic task from a hyperblock.
 class AtomicTaskBuilder {
-public:
+ public:
   AtomicTaskBuilder(OpBuilder &builder, Location loc, unsigned global_task_idx,
                     DenseMap<Value, Value> &memref_to_latest_version,
                     DenseMap<Value, Value> &value_to_latest_version)
-      : builder(builder), loc(loc), global_task_idx(global_task_idx),
+      : builder(builder),
+        loc(loc),
+        global_task_idx(global_task_idx),
         memref_to_latest_version(memref_to_latest_version),
         value_to_latest_version(value_to_latest_version) {}
 
@@ -334,7 +335,7 @@ public:
     return new_task;
   }
 
-private:
+ private:
   Value getLatestMemrefVersion(Value source) {
     auto it = this->memref_to_latest_version.find(source);
     return it != this->memref_to_latest_version.end() ? it->second : source;
@@ -548,7 +549,7 @@ struct CanonicalizeTaskPass
   }
 };
 
-} // namespace
+}  // namespace
 
 std::unique_ptr<Pass> mlir::taskflow::createCanonicalizeTaskPass() {
   return std::make_unique<CanonicalizeTaskPass>();

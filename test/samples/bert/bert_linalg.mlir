@@ -205,7 +205,7 @@ module {
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
     %30 = tensor.empty() : tensor<768x768xf32>
-    %transposed = linalg.transpose ins(%cst_16 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0] 
+    %transposed = linalg.transpose ins(%cst_16 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0]
     %31 = linalg.generic {indexing_maps = [#map6, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%29 : tensor<1x128x768xf32>) outs(%4 : tensor<1x128x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -224,8 +224,8 @@ module {
     } -> tensor<1x128x768xf32>
     %expanded_48 = tensor.expand_shape %36 [[0], [1], [2, 3]] : tensor<1x128x768xf32> into tensor<1x128x12x64xf32>
     %37 = tensor.empty() : tensor<1x12x128x64xf32>
-    %transposed_49 = linalg.transpose ins(%expanded_48 : tensor<1x128x12x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) permutation = [0, 2, 1, 3] 
-    %transposed_50 = linalg.transpose ins(%cst_18 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0] 
+    %transposed_49 = linalg.transpose ins(%expanded_48 : tensor<1x128x12x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) permutation = [0, 2, 1, 3]
+    %transposed_50 = linalg.transpose ins(%cst_18 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0]
     %38 = linalg.generic {indexing_maps = [#map10, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%transposed_50 : tensor<768x768xf32>) outs(%32 : tensor<1x768x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -237,7 +237,7 @@ module {
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
     %expanded_51 = tensor.expand_shape %40 [[0], [1], [2, 3]] : tensor<1x128x768xf32> into tensor<1x128x12x64xf32>
-    %transposed_52 = linalg.transpose ins(%cst_20 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0] 
+    %transposed_52 = linalg.transpose ins(%cst_20 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0]
     %41 = linalg.generic {indexing_maps = [#map10, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%transposed_52 : tensor<768x768xf32>) outs(%32 : tensor<1x768x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -249,9 +249,9 @@ module {
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
     %expanded_53 = tensor.expand_shape %43 [[0], [1], [2, 3]] : tensor<1x128x768xf32> into tensor<1x128x12x64xf32>
-    %transposed_54 = linalg.transpose ins(%expanded_53 : tensor<1x128x12x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) permutation = [0, 2, 1, 3] 
+    %transposed_54 = linalg.transpose ins(%expanded_53 : tensor<1x128x12x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) permutation = [0, 2, 1, 3]
     %44 = tensor.empty() : tensor<1x12x64x128xf32>
-    %transposed_55 = linalg.transpose ins(%expanded_51 : tensor<1x128x12x64xf32>) outs(%44 : tensor<1x12x64x128xf32>) permutation = [0, 2, 3, 1] 
+    %transposed_55 = linalg.transpose ins(%expanded_51 : tensor<1x128x12x64xf32>) outs(%44 : tensor<1x12x64x128xf32>) permutation = [0, 2, 3, 1]
     %45 = linalg.generic {indexing_maps = [#map11, #map12], iterator_types = ["parallel", "parallel", "parallel", "parallel"]} ins(%transposed_49 : tensor<1x12x128x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -341,9 +341,9 @@ module {
     %72 = linalg.batch_matmul ins(%collapsed_60, %collapsed_61 : tensor<12x128x128xf32>, tensor<12x128x64xf32>) outs(%71 : tensor<12x128x64xf32>) -> tensor<12x128x64xf32>
     %expanded_62 = tensor.expand_shape %72 [[0, 1], [2], [3]]: tensor<12x128x64xf32> into tensor<1x12x128x64xf32>
     %73 = tensor.empty() : tensor<1x128x12x64xf32>
-    %transposed_63 = linalg.transpose ins(%expanded_62 : tensor<1x12x128x64xf32>) outs(%73 : tensor<1x128x12x64xf32>) permutation = [0, 2, 1, 3] 
+    %transposed_63 = linalg.transpose ins(%expanded_62 : tensor<1x12x128x64xf32>) outs(%73 : tensor<1x128x12x64xf32>) permutation = [0, 2, 1, 3]
     %collapsed_64 = tensor.collapse_shape %transposed_63 [[0], [1], [2, 3]] : tensor<1x128x12x64xf32> into tensor<1x128x768xf32>
-    %transposed_65 = linalg.transpose ins(%cst_22 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0] 
+    %transposed_65 = linalg.transpose ins(%cst_22 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0]
     %74 = linalg.generic {indexing_maps = [#map6, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%collapsed_64 : tensor<1x128x768xf32>) outs(%4 : tensor<1x128x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -445,7 +445,7 @@ module {
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
     %95 = tensor.empty() : tensor<768x3072xf32>
-    %transposed_66 = linalg.transpose ins(%cst_26 : tensor<3072x768xf32>) outs(%95 : tensor<768x3072xf32>) permutation = [1, 0] 
+    %transposed_66 = linalg.transpose ins(%cst_26 : tensor<3072x768xf32>) outs(%95 : tensor<768x3072xf32>) permutation = [1, 0]
     %96 = linalg.generic {indexing_maps = [#map6, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%94 : tensor<1x128x768xf32>) outs(%4 : tensor<1x128x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -506,7 +506,7 @@ module {
       linalg.yield %195 : f32
     } -> tensor<1x128x3072xf32>
     %111 = tensor.empty() : tensor<3072x768xf32>
-    %transposed_67 = linalg.transpose ins(%cst_28 : tensor<768x3072xf32>) outs(%111 : tensor<3072x768xf32>) permutation = [1, 0] 
+    %transposed_67 = linalg.transpose ins(%cst_28 : tensor<768x3072xf32>) outs(%111 : tensor<3072x768xf32>) permutation = [1, 0]
     %112 = linalg.generic {indexing_maps = [#map6, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%110 : tensor<1x128x3072xf32>) outs(%99 : tensor<1x128x3072xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -608,7 +608,7 @@ module {
       %195 = arith.addf %in, %in_89 : f32
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
-    %transposed_68 = linalg.transpose ins(%cst_32 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0] 
+    %transposed_68 = linalg.transpose ins(%cst_32 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0]
     %134 = linalg.generic {indexing_maps = [#map6, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%133 : tensor<1x128x768xf32>) outs(%4 : tensor<1x128x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -624,8 +624,8 @@ module {
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
     %expanded_69 = tensor.expand_shape %137 [[0], [1], [2, 3]] : tensor<1x128x768xf32> into tensor<1x128x12x64xf32>
-    %transposed_70 = linalg.transpose ins(%expanded_69 : tensor<1x128x12x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) permutation = [0, 2, 1, 3] 
-    %transposed_71 = linalg.transpose ins(%cst_34 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0] 
+    %transposed_70 = linalg.transpose ins(%expanded_69 : tensor<1x128x12x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) permutation = [0, 2, 1, 3]
+    %transposed_71 = linalg.transpose ins(%cst_34 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0]
     %138 = linalg.generic {indexing_maps = [#map10, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%transposed_71 : tensor<768x768xf32>) outs(%32 : tensor<1x768x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -637,7 +637,7 @@ module {
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
     %expanded_72 = tensor.expand_shape %140 [[0], [1], [2, 3]] : tensor<1x128x768xf32> into tensor<1x128x12x64xf32>
-    %transposed_73 = linalg.transpose ins(%cst_36 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0] 
+    %transposed_73 = linalg.transpose ins(%cst_36 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0]
     %141 = linalg.generic {indexing_maps = [#map10, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%transposed_73 : tensor<768x768xf32>) outs(%32 : tensor<1x768x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -649,8 +649,8 @@ module {
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
     %expanded_74 = tensor.expand_shape %143 [[0], [1], [2, 3]] : tensor<1x128x768xf32> into tensor<1x128x12x64xf32>
-    %transposed_75 = linalg.transpose ins(%expanded_74 : tensor<1x128x12x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) permutation = [0, 2, 1, 3] 
-    %transposed_76 = linalg.transpose ins(%expanded_72 : tensor<1x128x12x64xf32>) outs(%44 : tensor<1x12x64x128xf32>) permutation = [0, 2, 3, 1] 
+    %transposed_75 = linalg.transpose ins(%expanded_74 : tensor<1x128x12x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) permutation = [0, 2, 1, 3]
+    %transposed_76 = linalg.transpose ins(%expanded_72 : tensor<1x128x12x64xf32>) outs(%44 : tensor<1x12x64x128xf32>) permutation = [0, 2, 3, 1]
     %144 = linalg.generic {indexing_maps = [#map11, #map12], iterator_types = ["parallel", "parallel", "parallel", "parallel"]} ins(%transposed_70 : tensor<1x12x128x64xf32>) outs(%37 : tensor<1x12x128x64xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -715,9 +715,9 @@ module {
     %collapsed_82 = tensor.collapse_shape %155 [[0, 1], [2], [3]] : tensor<1x12x128x64xf32> into tensor<12x128x64xf32>
     %156 = linalg.batch_matmul ins(%collapsed_81, %collapsed_82 : tensor<12x128x128xf32>, tensor<12x128x64xf32>) outs(%71 : tensor<12x128x64xf32>) -> tensor<12x128x64xf32>
     %expanded_83 = tensor.expand_shape %156 [[0, 1], [2], [3]] : tensor<12x128x64xf32> into tensor<1x12x128x64xf32>
-    %transposed_84 = linalg.transpose ins(%expanded_83 : tensor<1x12x128x64xf32>) outs(%73 : tensor<1x128x12x64xf32>) permutation = [0, 2, 1, 3] 
+    %transposed_84 = linalg.transpose ins(%expanded_83 : tensor<1x12x128x64xf32>) outs(%73 : tensor<1x128x12x64xf32>) permutation = [0, 2, 1, 3]
     %collapsed_85 = tensor.collapse_shape %transposed_84 [[0], [1], [2, 3]] : tensor<1x128x12x64xf32> into tensor<1x128x768xf32>
-    %transposed_86 = linalg.transpose ins(%cst_38 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0] 
+    %transposed_86 = linalg.transpose ins(%cst_38 : tensor<768x768xf32>) outs(%30 : tensor<768x768xf32>) permutation = [1, 0]
     %157 = linalg.generic {indexing_maps = [#map6, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%collapsed_85 : tensor<1x128x768xf32>) outs(%4 : tensor<1x128x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -818,7 +818,7 @@ module {
       %195 = arith.addf %in, %in_89 : f32
       linalg.yield %195 : f32
     } -> tensor<1x128x768xf32>
-    %transposed_87 = linalg.transpose ins(%cst_42 : tensor<3072x768xf32>) outs(%95 : tensor<768x3072xf32>) permutation = [1, 0] 
+    %transposed_87 = linalg.transpose ins(%cst_42 : tensor<3072x768xf32>) outs(%95 : tensor<768x3072xf32>) permutation = [1, 0]
     %178 = linalg.generic {indexing_maps = [#map6, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%177 : tensor<1x128x768xf32>) outs(%4 : tensor<1x128x768xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32
@@ -875,7 +875,7 @@ module {
       %195 = arith.mulf %in, %in_89 : f32
       linalg.yield %195 : f32
     } -> tensor<1x128x3072xf32>
-    %transposed_88 = linalg.transpose ins(%cst_44 : tensor<768x3072xf32>) outs(%111 : tensor<3072x768xf32>) permutation = [1, 0] 
+    %transposed_88 = linalg.transpose ins(%cst_44 : tensor<768x3072xf32>) outs(%111 : tensor<3072x768xf32>) permutation = [1, 0]
     %190 = linalg.generic {indexing_maps = [#map6, #map5], iterator_types = ["parallel", "parallel", "parallel"]} ins(%189 : tensor<1x128x3072xf32>) outs(%99 : tensor<1x128x3072xf32>) {
     ^bb0(%in: f32, %out: f32):
       linalg.yield %in : f32

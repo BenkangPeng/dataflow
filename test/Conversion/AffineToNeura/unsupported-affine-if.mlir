@@ -4,7 +4,7 @@
 
 // This test demonstrates the complete multi-stage lowering chain for conditionals.
 // Note: Direct lowering affine.if to Neura is not supported.
-// 
+//
 // The complete transformation chain:
 //   affine.if → scf.if → cf.cond_br → llvm.cond_br → neura.cond_br
 //

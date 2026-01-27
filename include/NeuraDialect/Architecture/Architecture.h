@@ -142,7 +142,7 @@ static const std::map<std::string, std::vector<OperationKind>>
 //===----------------------------------------------------------------------===//
 
 class BasicResource {
-public:
+ public:
   virtual ~BasicResource() = default;
   virtual int getId() const = 0;
   virtual std::string getType() const = 0;
@@ -163,7 +163,7 @@ class RegisterFileCluster;
 //===----------------------------------------------------------------------===//
 
 class FunctionUnit : public BasicResource {
-public:
+ public:
   FunctionUnit(int id);
 
   int getId() const override;
@@ -191,16 +191,16 @@ public:
     return false;
   }
 
-protected:
+ protected:
   std::set<OperationKind> supported_operations;
 
-private:
+ private:
   int id;
   Tile *tile;
 };
 
 class CustomizableFunctionUnit : public FunctionUnit {
-public:
+ public:
   CustomizableFunctionUnit(int id) : FunctionUnit(id) {}
   std::string getType() const override { return "customizable_function_unit"; }
   ResourceKind getKind() const override { return ResourceKind::FunctionUnit; }
@@ -214,7 +214,7 @@ public:
 //===----------------------------------------------------------------------===//
 
 class Tile : public BasicResource {
-public:
+ public:
   Tile(int id, int x, int y);
 
   int getId() const override;
@@ -280,7 +280,7 @@ public:
   int getMemoryCapacity() const { return memory_capacity; }
   void setMemoryCapacity(int capacity) { memory_capacity = capacity; }
 
-private:
+ private:
   int id;
   int x, y;
   std::set<Tile *> src_tiles;
@@ -288,13 +288,13 @@ private:
   std::set<Link *> in_links;
   std::set<Link *> out_links;
   std::vector<std::unique_ptr<FunctionUnit>>
-      functional_unit_storage;               // Owns FUs.
-  std::set<FunctionUnit *> functional_units; // Non-owning, for fast lookup.
+      functional_unit_storage;                // Owns FUs.
+  std::set<FunctionUnit *> functional_units;  // Non-owning, for fast lookup.
   RegisterFileCluster *register_file_cluster = nullptr;
 
   // Port and memory configuration.
   std::vector<std::string> ports;
-  int memory_capacity = -1; // -1 means not configured.
+  int memory_capacity = -1;  // -1 means not configured.
 };
 
 //===----------------------------------------------------------------------===//
@@ -302,7 +302,7 @@ private:
 //===----------------------------------------------------------------------===//
 
 class Link : public BasicResource {
-public:
+ public:
   Link(int id);
 
   int getId() const override;
@@ -325,12 +325,12 @@ public:
   void setLatency(int l) { latency = l; }
   void setBandwidth(int b) { bandwidth = b; }
 
-private:
+ private:
   int id;
   Tile *src_tile;
   Tile *dst_tile;
-  int latency = 1;    // Latency in cycles.
-  int bandwidth = 32; // Bandwidth in bits per cycle.
+  int latency = 1;     // Latency in cycles.
+  int bandwidth = 32;  // Bandwidth in bits per cycle.
 };
 
 //===----------------------------------------------------------------------===//
@@ -338,7 +338,7 @@ private:
 //===----------------------------------------------------------------------===//
 
 class Register : public BasicResource {
-public:
+ public:
   Register(int global_id, int per_tile_id);
 
   int getId() const override;
@@ -359,7 +359,7 @@ public:
 
   RegisterFile *getRegisterFile() const;
 
-private:
+ private:
   int global_id;
   int per_tile_id;
   RegisterFile *register_file;
@@ -370,7 +370,7 @@ private:
 //===----------------------------------------------------------------------===//
 
 class RegisterFile : public BasicResource {
-public:
+ public:
   RegisterFile(int id);
 
   int getId() const override;
@@ -392,7 +392,7 @@ public:
   const std::map<int, Register *> &getRegisters() const;
   RegisterFileCluster *getRegisterFileCluster() const;
 
-private:
+ private:
   int id;
   std::map<int, Register *> registers;
   RegisterFileCluster *register_file_cluster = nullptr;
@@ -403,7 +403,7 @@ private:
 //===----------------------------------------------------------------------===//
 
 class RegisterFileCluster : public BasicResource {
-public:
+ public:
   RegisterFileCluster(int id);
   int getId() const override;
 
@@ -423,7 +423,7 @@ public:
   void addRegisterFile(RegisterFile *register_file);
   const std::map<int, RegisterFile *> &getRegisterFiles() const;
 
-private:
+ private:
   int id;
   Tile *tile;
   std::map<int, RegisterFile *> register_files;
@@ -448,7 +448,7 @@ struct LinkOverride;
 // Now supports comprehensive configuration via YAML including ports, memory,
 // and function units.
 class Architecture {
-public:
+ public:
   // Single constructor - handles all cases internally.
   Architecture(int multi_cgra_rows, int multi_cgra_columns,
                BaseTopology multi_cgra_base_topology = BaseTopology::MESH,
@@ -483,7 +483,7 @@ public:
   std::vector<Tile *> getAllTiles() const;
   std::vector<Link *> getAllLinks() const;
 
-private:
+ private:
   // Helper methods for constructor initialization.
   void initializeTiles(int rows, int columns);
   void configureDefaultTileSettings(const TileDefaults &tile_defaults);
@@ -508,13 +508,13 @@ private:
   // Architecture components: tiles, links, and their mappings.
   // Ports and memory are now modeled as part of Tile class.
   std::map<int, std::unique_ptr<Tile>>
-      tile_storage_; // Owns tiles, key is unique tile_id.
+      tile_storage_;  // Owns tiles, key is unique tile_id.
   std::map<int, std::unique_ptr<Link>>
-      link_storage_; // Owns links, key is unique link_id.
+      link_storage_;  // Owns links, key is unique link_id.
   std::unordered_map<int, Tile *>
-      id_to_tile_; // Maps unique tile_id to Tile pointer.
+      id_to_tile_;  // Maps unique tile_id to Tile pointer.
   std::unordered_map<std::pair<int, int>, Tile *, PairHash>
-      coord_to_tile_; // Maps (x,y) coordinates to Tile pointer.
+      coord_to_tile_;  // Maps (x,y) coordinates to Tile pointer.
 
   int multi_cgra_rows_;
   int multi_cgra_columns_;
@@ -522,7 +522,7 @@ private:
   int per_cgra_columns_;
 };
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
-#endif // NEURA_ARCHITECTURE_H
+#endif  // NEURA_ARCHITECTURE_H

@@ -41,9 +41,9 @@ std::vector<Operation *> getTopologicallySortedOps(Operation *func_op);
 // Given the sorted operations, returns a vector of pairs where each pair
 // contains a vector of operations at the same ALAP (as late as possible)
 // level and the level number.
-std::vector<std::vector<Operation *>>
-getOpsInAlapLevels(const std::vector<Operation *> &sorted_ops,
-                   const std::set<Operation *> &critical_ops);
+std::vector<std::vector<Operation *>> getOpsInAlapLevels(
+    const std::vector<Operation *> &sorted_ops,
+    const std::set<Operation *> &critical_ops);
 
 // Flattens the level buckets into a vector of pairs (operation, level).
 // Within each ALAP level, critical ops are prioritized before non-critical ops.
@@ -82,8 +82,8 @@ bool tryRouteBackwardMove(Operation *mov_op, MappingLoc src_loc,
 // ctrl_mov users found.
 llvm::SmallVector<Operation *> getCtrlMovUsers(Operation *op);
 
-// Identifies operations on the critical path (i.e., operations with zero slack).
-// Returns pair of: (critical_ops_set, asap_level_map)
+// Identifies operations on the critical path (i.e., operations with zero
+// slack). Returns pair of: (critical_ops_set, asap_level_map)
 std::pair<std::set<Operation *>, llvm::DenseMap<Operation *, int>>
 identifyCriticalPathOps(const std::vector<Operation *> &sorted_ops);
 
@@ -116,5 +116,5 @@ bool canReachLocInTime(const std::vector<Operation *> &producers,
 Register *getAvailableRegister(const MappingState &mapping_state, Tile *tile,
                                int start_time, int exclusive_end_time);
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir

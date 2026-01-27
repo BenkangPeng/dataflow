@@ -5,11 +5,11 @@
 func.func @fusion_test(%arg0: tensor<16xf32>) -> tensor<16xf32> {
   %0 = tosa.add %arg0, %arg0 : (tensor<16xf32>, tensor<16xf32>) -> tensor<16xf32>
   %1 = tosa.mul %0, %0 : (tensor<16xf32>, tensor<16xf32>) -> tensor<16xf32>
-  
+
   // A simple relu-like operation: max(0, x)
   %zeros = "tosa.const"() {value = dense<0.0> : tensor<16xf32>} : () -> tensor<16xf32>
   %2 = tosa.maximum %1, %zeros : (tensor<16xf32>, tensor<16xf32>) -> tensor<16xf32>
-  
+
   return %2 : tensor<16xf32>
 }
 

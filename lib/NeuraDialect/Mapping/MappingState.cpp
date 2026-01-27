@@ -1,8 +1,9 @@
 #include "NeuraDialect/Mapping/MappingState.h"
+
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinTypes.h"
-#include "llvm/Support/raw_ostream.h"
 
 using namespace mlir;
 using namespace mlir::neura;
@@ -63,7 +64,6 @@ bool MappingState::isAvailableAcrossTime(const MappingLoc &loc) const {
     }
     return true;
   } else {
-
     // Checks the availability across time domain.
     for (int t = loc.time_step % II; t < II * kMaxSteps; t += II) {
       MappingLoc check_loc = {loc.resource, t};
@@ -97,8 +97,8 @@ std::optional<Operation *> MappingState::getOpAt(MappingLoc loc) const {
   return it->second;
 }
 
-std::optional<Operation *>
-MappingState::getOpAtLocAcrossTime(MappingLoc loc) const {
+std::optional<Operation *> MappingState::getOpAtLocAcrossTime(
+    MappingLoc loc) const {
   for (int t = loc.time_step % II; t < II * kMaxSteps; t += II) {
     MappingLoc check_loc = {loc.resource, t};
     auto it = loc_to_op.find(check_loc);
@@ -119,8 +119,8 @@ int MappingState::countOpsAtResource(BasicResource *resource) const {
   return count;
 }
 
-const std::vector<MappingLoc> &
-MappingState::getAllLocsOfOp(Operation *op) const {
+const std::vector<MappingLoc> &MappingState::getAllLocsOfOp(
+    Operation *op) const {
   auto it = op_to_locs.find(op);
   if (it != op_to_locs.end()) {
     return it->second;
@@ -166,8 +166,8 @@ std::vector<MappingLoc> MappingState::getNextStepTiles(MappingLoc loc) const {
 //   return it != current_step_tiles.end() ? it->second : empty;
 // }
 
-std::vector<MappingLoc>
-MappingState::getCurrentStepLinks(MappingLoc loc) const {
+std::vector<MappingLoc> MappingState::getCurrentStepLinks(
+    MappingLoc loc) const {
   assert((loc.resource->getKind() == ResourceKind::Tile) &&
          "Current step links can only be queried for tiles");
   std::vector<MappingLoc> current_step_links;
@@ -175,7 +175,7 @@ MappingState::getCurrentStepLinks(MappingLoc loc) const {
   if (!(current_step < II * kMaxSteps)) {
     llvm::errs() << "Current step exceeds max steps: " << current_step
                  << ", max steps: " << II * kMaxSteps << "\n";
-    return current_step_links; // Return empty if step exceeds max.
+    return current_step_links;  // Return empty if step exceeds max.
   }
   // Collects neighboring tiles at t for given tile.
   Tile *tile = dyn_cast<Tile>(loc.resource);
@@ -187,14 +187,13 @@ MappingState::getCurrentStepLinks(MappingLoc loc) const {
 }
 
 void MappingState::reserveRoute(Operation *op, ArrayRef<MappingLoc> path) {
-
   // Records all mapping locations.
-
 
   llvm::errs() << "Reserving route for operation: " << *op << "\n";
   llvm::errs() << "Path: ";
   for (const MappingLoc &loc : path) {
-    llvm::errs() << loc.resource->getType() << "#" << loc.resource->getId() << " @t=" << loc.time_step << " ";
+    llvm::errs() << loc.resource->getType() << "#" << loc.resource->getId()
+                 << " @t=" << loc.time_step << " ";
   }
   llvm::errs() << "\n";
   assert(op_to_locs.find(op) == op_to_locs.end() &&
@@ -270,8 +269,7 @@ void MappingState::dumpOpToLocs(llvm::raw_ostream &os) const {
         (II < kTwoDigitThreshold ? kHeaderPrefixLenSingleDigit
                                  : kHeaderPrefixLenDoubleDigit) -
         (slot < kTwoDigitThreshold ? kSingleDigitLen : kDoubleDigitLen);
-    for (int i = 0; i < padding; ++i)
-      os << " ";
+    for (int i = 0; i < padding; ++i) os << " ";
     os << " | ";
   }
   os << "\n";
@@ -279,8 +277,7 @@ void MappingState::dumpOpToLocs(llvm::raw_ostream &os) const {
   // Prints separator line.
   os << "---------+";
   for (size_t i = 0; i < time_slots.size(); ++i) {
-    for (int j = 0; j < kKeyMaxLen + 1; ++j)
-      os << "-";
+    for (int j = 0; j < kKeyMaxLen + 1; ++j) os << "-";
     os << "+";
   }
   os << "\n";
@@ -325,8 +322,7 @@ void MappingState::dumpOpToLocs(llvm::raw_ostream &os) const {
         if (op->getNumOperands() > 0) {
           op_stream << "(";
           for (unsigned i = 0; i < op->getNumOperands(); ++i) {
-            if (i > 0)
-              op_stream << ", ";
+            if (i > 0) op_stream << ", ";
             op->getOperand(i).printAsOperand(op_stream, flags);
           }
           op_stream << ")";
@@ -347,12 +343,10 @@ void MappingState::dumpOpToLocs(llvm::raw_ostream &os) const {
         // Pads to fixed width (kCellWidth chars).
         os << op_str;
         int padding = kCellWidth - op_str.length();
-        for (int i = 0; i < padding; ++i)
-          os << " ";
+        for (int i = 0; i < padding; ++i) os << " ";
       } else {
         // Renders empty cell.
-        for (int i = 0; i < kCellWidth; ++i)
-          os << " ";
+        for (int i = 0; i < kCellWidth; ++i) os << " ";
       }
       os << " | ";
     }

@@ -25,14 +25,14 @@ module {
     %14 = "neura.mul"(%5, %13) : (i32, i32) -> i32
     %15 = "neura.add"(%4, %13) : (i32, i32) -> i32
     neura.store_indexed %15 to %1[%11 : i64] memref<?xi32> : i32
-    
+
     // Test new float operations with constant folding
     %16 = "neura.cast"(%13) <{cast_type = "sitofp"}> : (i32) -> f32
     %17 = "neura.fmul"(%16, %7) : (f32, f32) -> f32
     %18 = "neura.fsub"(%17, %8) : (f32, f32) -> f32
     %19 = "neura.fmax"(%18, %9) : (f32, f32) -> f32
     %20 = "neura.fmin"(%19, %10) : (f32, f32) -> f32
-    
+
     %21 = "neura.add"(%11, %2) : (i64, i64) -> i64
     neura.br %21 : i64 to ^bb1
   ^bb3:  // pred: ^bb1

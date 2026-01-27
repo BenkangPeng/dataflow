@@ -45,7 +45,6 @@ struct BuiltinUnrealizedConversionCastToNeuraCast
 
 struct LowerBuiltinToNeuraPass
     : public PassWrapper<LowerBuiltinToNeuraPass, OperationPass<ModuleOp>> {
-
   MLIR_DEFINE_EXPLICIT_INTERNAL_INLINE_TYPE_ID(LowerBuiltinToNeuraPass)
 
   StringRef getArgument() const override { return "lower-builtin-to-neura"; }
@@ -75,7 +74,7 @@ struct LowerBuiltinToNeuraPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 std::unique_ptr<Pass> mlir::createLowerBuiltinToNeuraPass() {
   return std::make_unique<LowerBuiltinToNeuraPass>();

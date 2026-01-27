@@ -81,7 +81,7 @@ def CanonicalizeReturn : Pass<"canonicalize-return", "ModuleOp">{
     This pass processes void functions and adds trigger conditions to their
     return operations. For void functions, the return operation needs an
     execution condition to properly trigger in dataflow mode.
-    
+
     This pass should run before CanonicalizeLiveIn and TransformCtrlToDataFlow.
   }];
   let constructor = "neura::createCanonicalizeReturnPass()";
@@ -182,7 +182,7 @@ def HardwareMerge : Pass<"hardware-merge", "ModuleOp"> {
     hardware configuration that supports all patterns while minimizing
     hardware cost. It uses a Functional Unit (FU) based design where each
     FU executes exactly one operation type.
-    
+
     Algorithm:
     1. Extract pattern DAGs with topological structure from fused_op regions
     2. Sort patterns by complexity (distinct operation count and cost)

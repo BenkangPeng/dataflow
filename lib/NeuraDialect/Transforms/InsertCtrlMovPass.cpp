@@ -95,7 +95,7 @@ struct InsertCtrlMovPass
     });
   }
 };
-} // namespace
+}  // namespace
 
 namespace mlir {
 namespace neura {
@@ -104,5 +104,5 @@ std::unique_ptr<Pass> createInsertCtrlMovPass() {
   return std::make_unique<InsertCtrlMovPass>();
 }
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir

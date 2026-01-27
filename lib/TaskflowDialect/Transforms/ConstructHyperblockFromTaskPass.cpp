@@ -1,7 +1,14 @@
+#include <cassert>
+#include <memory>
+#include <optional>
+
 #include "TaskflowDialect/TaskflowDialect.h"
 #include "TaskflowDialect/TaskflowOps.h"
 #include "TaskflowDialect/TaskflowPasses.h"
-
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/Casting.h"
+#include "llvm/Support/LogicalResult.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Conversion/AffineToStandard/AffineToStandard.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
@@ -12,13 +19,6 @@
 #include "mlir/IR/Value.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/LogicalResult.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <memory>
-#include <optional>
 
 using namespace mlir;
 using namespace mlir::taskflow;
@@ -163,8 +163,8 @@ static void createCounterChain(OpBuilder &builder, Location loc,
 }
 
 // Gets top-level loops' info (loops without parents).
-static SmallVector<LoopInfo *>
-getTopLevelLoopsInfo(SmallVector<LoopInfo> &loops_info) {
+static SmallVector<LoopInfo *> getTopLevelLoopsInfo(
+    SmallVector<LoopInfo> &loops_info) {
   SmallVector<LoopInfo *> top_level_loops_info;
   for (auto &loop_info : loops_info) {
     if (!loop_info.parent_loop_info) {
@@ -316,8 +316,8 @@ static SmallVector<Value> collectUsedIndices(
 }
 
 // Determines output types for the hyperblock based on operations.
-static SmallVector<Type>
-determineHyperblockOutputTypes(const SmallVector<Operation *> &operations) {
+static SmallVector<Type> determineHyperblockOutputTypes(
+    const SmallVector<Operation *> &operations) {
   SmallVector<Type> output_types = {};
 
   // Checks if there's an affine.yield operation.
@@ -574,7 +574,7 @@ struct ConstructHyperblockFromTaskPass
     }
   }
 };
-} // namespace
+}  // namespace
 
 std::unique_ptr<Pass> mlir::taskflow::createConstructHyperblockFromTaskPass() {
   return std::make_unique<ConstructHyperblockFromTaskPass>();

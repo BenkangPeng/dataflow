@@ -9,4 +9,3 @@ func.func @test_dot_generation(%a: f32, %b: f32, %c: f32) -> f32 {
   // CHECK-DOT-GENERATION: label = "neura.fadd_fadd : (f32)\n"
   return %res : f32
 }
-

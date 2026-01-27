@@ -1,11 +1,12 @@
 #ifndef NEURA_MAPPING_STATE_H
 #define NEURA_MAPPING_STATE_H
 
-#include "NeuraDialect/Architecture/Architecture.h"
-#include "mlir/IR/Operation.h"
-#include "llvm/Support/raw_ostream.h"
 #include <optional>
 #include <vector>
+
+#include "NeuraDialect/Architecture/Architecture.h"
+#include "llvm/Support/raw_ostream.h"
+#include "mlir/IR/Operation.h"
 
 namespace mlir {
 namespace neura {
@@ -32,11 +33,12 @@ struct MappingLoc {
   }
 };
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
 namespace std {
-template <> struct hash<mlir::neura::MappingLoc> {
+template <>
+struct hash<mlir::neura::MappingLoc> {
   std::size_t operator()(const mlir::neura::MappingLoc &loc) const {
     std::size_t h1 =
         std::hash<int>()(static_cast<int>(loc.resource->getKind()));
@@ -45,14 +47,14 @@ template <> struct hash<mlir::neura::MappingLoc> {
     return h1 ^ (h2 << 1) ^ (h3 << 2);
   }
 };
-} // namespace std
+}  // namespace std
 
 namespace mlir {
 namespace neura {
 
 // Tracks placement and routing of ops on the CGRA.
 class MappingState {
-public:
+ public:
   MappingState(const Architecture &arch, int II, bool is_spatial_only);
   // Binds a (tile/link, time_step) location to an operation.
   bool bindOp(const MappingLoc &loc, Operation *op);
@@ -133,7 +135,7 @@ public:
     this->op_to_locs = op_to_locs;
   }
 
-private:
+ private:
   // Initiation interval.
   int II;
   bool is_spatial_only;
@@ -144,13 +146,13 @@ private:
   std::map<Operation *, std::vector<MappingLoc>> op_to_locs;
 };
 
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
 namespace mlir {
 namespace neura {
 class MappingStateSnapshot {
-public:
+ public:
   MappingStateSnapshot(const MappingState &mapping_state);
 
   void restore(MappingState &mapping_state);
@@ -159,12 +161,12 @@ public:
     return this->op_to_locs;
   }
 
-private:
+ private:
   std::set<MappingLoc> occupied_locs;
   std::map<MappingLoc, Operation *> loc_to_op;
   std::map<Operation *, std::vector<MappingLoc>> op_to_locs;
 };
-} // namespace neura
-} // namespace mlir
+}  // namespace neura
+}  // namespace mlir
 
-#endif // NEURA_MAPPING_STATE_H
+#endif  // NEURA_MAPPING_STATE_H

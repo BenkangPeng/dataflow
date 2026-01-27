@@ -14,16 +14,16 @@
 #include "NeuraDialect/NeuraPasses.h"
 #include "NeuraDialect/NeuraTypes.h"
 #include "NeuraDialect/Util/NeuraYamlKeys.h"
-#include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/IR/BuiltinAttributes.h"
-#include "mlir/IR/PatternMatch.h"
-#include "mlir/Pass/Pass.h"
-#include "mlir/Transforms/GreedyPatternRewriteDriver.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/YAMLParser.h"
 #include "llvm/Support/raw_ostream.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/IR/BuiltinAttributes.h"
+#include "mlir/IR/PatternMatch.h"
+#include "mlir/Pass/Pass.h"
+#include "mlir/Transforms/GreedyPatternRewriteDriver.h"
 
 using namespace mlir;
 using namespace mlir::neura;
@@ -36,13 +36,11 @@ using namespace mlir::neura::yamlkeys;
 // Utility: Extracts an integer from a YAML ScalarNode. Returns true on success.
 static bool parseYamlScalarInt(const llvm::yaml::Node *node, int &result) {
   auto *scalar = llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(node);
-  if (!scalar)
-    return false;
+  if (!scalar) return false;
   llvm::SmallString<64> value_string;
   llvm::StringRef value_ref = scalar->getValue(value_string);
   long long temp_value = 0;
-  if (value_ref.getAsInteger(10, temp_value))
-    return false;
+  if (value_ref.getAsInteger(10, temp_value)) return false;
   result = static_cast<int>(temp_value);
   return true;
 }
@@ -51,8 +49,7 @@ static bool parseYamlScalarInt(const llvm::yaml::Node *node, int &result) {
 static bool parseYamlScalarString(const llvm::yaml::Node *node,
                                   std::string &result) {
   auto *scalar = llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(node);
-  if (!scalar)
-    return false;
+  if (!scalar) return false;
   llvm::SmallString<64> value_string;
   llvm::StringRef value_ref = scalar->getValue(value_string);
   result = value_ref.str();
@@ -63,13 +60,11 @@ static bool parseYamlScalarString(const llvm::yaml::Node *node,
 static void parseYamlStringSequence(llvm::yaml::Node *node,
                                     std::vector<std::string> &result) {
   auto *seq = llvm::dyn_cast_or_null<llvm::yaml::SequenceNode>(node);
-  if (!seq)
-    return;
+  if (!seq) return;
   result.clear();
   for (auto &item : *seq) {
     std::string value;
-    if (parseYamlScalarString(&item, value))
-      result.push_back(value);
+    if (parseYamlScalarString(&item, value)) result.push_back(value);
   }
 }
 
@@ -77,8 +72,7 @@ static void parseYamlStringSequence(llvm::yaml::Node *node,
 static bool yamlParseError(const std::string &msg,
                            const std::string &file = "") {
   llvm::errs() << "[MapToAcceleratorPass] YAML parse error";
-  if (!file.empty())
-    llvm::errs() << " in: " << file;
+  if (!file.empty()) llvm::errs() << " in: " << file;
   llvm::errs() << ": " << msg << "\n";
   return false;
 }
@@ -90,8 +84,7 @@ void parseTileDefaults(llvm::yaml::MappingNode *tile_defaults_map,
   for (auto &key_value_pair : *tile_defaults_map) {
     auto *key_node =
         llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(key_value_pair.getKey());
-    if (!key_node)
-      continue;
+    if (!key_node) continue;
     llvm::SmallString<64> key_string;
     llvm::StringRef key_ref = key_node->getValue(key_string);
 
@@ -115,8 +108,7 @@ void parseTileOverrideOperations(llvm::yaml::MappingNode *override_map,
   for (auto &key_value_pair : *override_map) {
     auto *key_node =
         llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(key_value_pair.getKey());
-    if (!key_node)
-      continue;
+    if (!key_node) continue;
     llvm::SmallString<64> key_string;
     llvm::StringRef key_ref = key_node->getValue(key_string);
 
@@ -139,8 +131,7 @@ void parseSingleTileOverride(llvm::yaml::MappingNode *override_map,
   for (auto &key_value_pair : *override_map) {
     auto *key_node =
         llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(key_value_pair.getKey());
-    if (!key_node)
-      continue;
+    if (!key_node) continue;
     llvm::SmallString<64> key_string;
     llvm::StringRef key_ref = key_node->getValue(key_string);
 
@@ -182,8 +173,7 @@ bool parseTileOverrides(
   for (auto &override_node : *tile_overrides_seq) {
     auto *override_map =
         llvm::dyn_cast_or_null<llvm::yaml::MappingNode>(&override_node);
-    if (!override_map)
-      continue;
+    if (!override_map) continue;
     mlir::neura::TileOverride override;
     parseSingleTileOverride(override_map, override);
     tile_overrides.push_back(override);
@@ -197,8 +187,7 @@ bool parseLinkDefaults(llvm::yaml::MappingNode *link_defaults_map,
   for (auto &key_value_pair : *link_defaults_map) {
     auto *key_node =
         llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(key_value_pair.getKey());
-    if (!key_node)
-      continue;
+    if (!key_node) continue;
     llvm::SmallString<64> key_string;
     llvm::StringRef key_ref = key_node->getValue(key_string);
 
@@ -223,8 +212,7 @@ void parseSingleLinkOverride(llvm::yaml::MappingNode *override_map,
   for (auto &key_value_pair : *override_map) {
     auto *key_node =
         llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(key_value_pair.getKey());
-    if (!key_node)
-      continue;
+    if (!key_node) continue;
     llvm::SmallString<64> key_string;
     llvm::StringRef key_ref = key_node->getValue(key_string);
 
@@ -267,8 +255,7 @@ bool parseLinkOverrides(
   for (auto &override_node : *link_overrides_seq) {
     auto *override_map =
         llvm::dyn_cast_or_null<llvm::yaml::MappingNode>(&override_node);
-    if (!override_map)
-      continue;
+    if (!override_map) continue;
     mlir::neura::LinkOverride override;
     parseSingleLinkOverride(override_map, override);
     link_overrides.push_back(override);
@@ -300,17 +287,14 @@ bool parseArchitectureYaml(
     mlir::neura::LinkDefaults &link_defaults,
     std::vector<mlir::neura::LinkOverride> &link_overrides) {
   auto *root = doc.getRoot();
-  if (!root)
-    return yamlParseError("Empty YAML document");
+  if (!root) return yamlParseError("Empty YAML document");
   auto *root_map = llvm::dyn_cast<llvm::yaml::MappingNode>(root);
-  if (!root_map)
-    return yamlParseError("YAML root is not a mapping");
+  if (!root_map) return yamlParseError("YAML root is not a mapping");
 
   for (auto &key_value_pair : *root_map) {
     auto *key_node =
         llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(key_value_pair.getKey());
-    if (!key_node)
-      continue;
+    if (!key_node) continue;
     llvm::SmallString<64> key_string;
     llvm::StringRef key_ref = key_node->getValue(key_string);
 
@@ -320,14 +304,12 @@ bool parseArchitectureYaml(
     } else if (key_ref == kMultiCgraDefaults) {
       auto *multi_cgra_map = llvm::dyn_cast_or_null<llvm::yaml::MappingNode>(
           key_value_pair.getValue());
-      if (!multi_cgra_map)
-        continue;
+      if (!multi_cgra_map) continue;
       for (auto &multi_cgra_map_key_value_pair : *multi_cgra_map) {
         auto *multi_cgra_map_key_node =
             llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(
                 multi_cgra_map_key_value_pair.getKey());
-        if (!multi_cgra_map_key_node)
-          continue;
+        if (!multi_cgra_map_key_node) continue;
         llvm::SmallString<64> multi_cgra_map_key_string;
         llvm::StringRef multi_cgra_map_key_ref =
             multi_cgra_map_key_node->getValue(multi_cgra_map_key_string);
@@ -350,14 +332,12 @@ bool parseArchitectureYaml(
     } else if (key_ref == kPerCgraDefaults) {
       auto *per_cgra_map = llvm::dyn_cast_or_null<llvm::yaml::MappingNode>(
           key_value_pair.getValue());
-      if (!per_cgra_map)
-        continue;
+      if (!per_cgra_map) continue;
       for (auto &per_cgra_map_key_value_pair : *per_cgra_map) {
         auto *per_cgra_map_key_node =
             llvm::dyn_cast_or_null<llvm::yaml::ScalarNode>(
                 per_cgra_map_key_value_pair.getKey());
-        if (!per_cgra_map_key_node)
-          continue;
+        if (!per_cgra_map_key_node) continue;
         llvm::SmallString<64> per_cgra_map_key_string;
         llvm::StringRef per_cgra_map_key_ref =
             per_cgra_map_key_node->getValue(per_cgra_map_key_string);
@@ -594,7 +574,6 @@ struct MapToAcceleratorPass
         mlir::neura::BaseTopology::MESH;
 
     if (!architecture_spec_file.empty()) {
-
       // Use LLVM YAML parser to validate the YAML syntax (no mapping yet)
       llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> buffer_or_err =
           llvm::MemoryBuffer::getFile(architecture_spec_file);
@@ -612,7 +591,7 @@ struct MapToAcceleratorPass
 
       bool parse_failed = false;
       llvm::yaml::Document &yaml_doc = *yaml_stream.begin();
-      (void)yaml_doc; // ensure document is created
+      (void)yaml_doc;  // ensure document is created
       if (yaml_stream.failed()) {
         parse_failed = true;
       }
@@ -690,7 +669,7 @@ struct MapToAcceleratorPass
         }
         rec_mii = longest->length;
       } else if (!longest) {
-        rec_mii = 1; // No recurrence cycles found, set MII to 1.
+        rec_mii = 1;  // No recurrence cycles found, set MII to 1.
       }
 
       // Always use full constructor with YAML configuration
@@ -702,7 +681,7 @@ struct MapToAcceleratorPass
 
       const int possible_min_ii = std::max(rec_mii, res_mii);
       const int max_ii =
-          max_ctrl_mem_items; // Use YAML config (default 20 if not specified)
+          max_ctrl_mem_items;  // Use YAML config (default 20 if not specified)
 
       std::vector<Operation *> topologically_sorted_ops =
           getTopologicallySortedOps(func);
@@ -808,13 +787,13 @@ struct MapToAcceleratorPass
           break;
         }
         llvm::errs() << "[DEBUG] mapping failed for II = " << ii << "\n";
-        mapping_state.dumpOpToLocs(); // logs to stderr
+        mapping_state.dumpOpToLocs();  // logs to stderr
       }
     });
   }
 };
 
-} // namespace
+}  // namespace
 
 namespace mlir::neura {
 
@@ -822,4 +801,4 @@ std::unique_ptr<Pass> createMapToAcceleratorPass() {
   return std::make_unique<MapToAcceleratorPass>();
 }
 
-} // namespace mlir::neura
+}  // namespace mlir::neura

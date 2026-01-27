@@ -26,4 +26,4 @@
 #include "TaskflowDialect/Taskflow.h.inc"
 #undef GET_OP_CLASSES
 
-#endif // TASKFLOW_OPS_H
+#endif  // TASKFLOW_OPS_H

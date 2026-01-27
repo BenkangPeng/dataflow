@@ -213,4 +213,3 @@ module attributes {} {
 // CANONICALIZE-NEXT:     return %0 : i32
 // CANONICALIZE-NEXT:   }
 // CANONICALIZE-NEXT: }
-

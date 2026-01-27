@@ -34,7 +34,7 @@ module {
     } -> tensor<1x16x5x5xf32>
     %collapsed = tensor.collapse_shape %7 [[0], [1, 2, 3]] : tensor<1x16x5x5xf32> into tensor<1x400xf32>
     %8 = tensor.empty() : tensor<400x120xf32>
-    %transposed = linalg.transpose ins(%cst_2 : tensor<120x400xf32>) outs(%8 : tensor<400x120xf32>) permutation = [1, 0] 
+    %transposed = linalg.transpose ins(%cst_2 : tensor<120x400xf32>) outs(%8 : tensor<400x120xf32>) permutation = [1, 0]
     %9 = tensor.empty() : tensor<1x120xf32>
     %10 = linalg.fill ins(%cst_0 : f32) outs(%9 : tensor<1x120xf32>) -> tensor<1x120xf32>
     %11 = linalg.matmul ins(%collapsed, %transposed : tensor<1x400xf32>, tensor<400x120xf32>) outs(%10 : tensor<1x120xf32>) -> tensor<1x120xf32>
@@ -50,7 +50,7 @@ module {
       linalg.yield %26 : f32
     } -> tensor<1x120xf32>
     %14 = tensor.empty() : tensor<120x84xf32>
-    %transposed_8 = linalg.transpose ins(%cst_4 : tensor<84x120xf32>) outs(%14 : tensor<120x84xf32>) permutation = [1, 0] 
+    %transposed_8 = linalg.transpose ins(%cst_4 : tensor<84x120xf32>) outs(%14 : tensor<120x84xf32>) permutation = [1, 0]
     %15 = tensor.empty() : tensor<1x84xf32>
     %16 = linalg.fill ins(%cst_0 : f32) outs(%15 : tensor<1x84xf32>) -> tensor<1x84xf32>
     %17 = linalg.matmul ins(%13, %transposed_8 : tensor<1x120xf32>, tensor<120x84xf32>) outs(%16 : tensor<1x84xf32>) -> tensor<1x84xf32>
@@ -66,7 +66,7 @@ module {
       linalg.yield %26 : f32
     } -> tensor<1x84xf32>
     %20 = tensor.empty() : tensor<84x10xf32>
-    %transposed_9 = linalg.transpose ins(%cst_6 : tensor<10x84xf32>) outs(%20 : tensor<84x10xf32>) permutation = [1, 0] 
+    %transposed_9 = linalg.transpose ins(%cst_6 : tensor<10x84xf32>) outs(%20 : tensor<84x10xf32>) permutation = [1, 0]
     %21 = tensor.empty() : tensor<1x10xf32>
     %22 = linalg.fill ins(%cst_0 : f32) outs(%21 : tensor<1x10xf32>) -> tensor<1x10xf32>
     %23 = linalg.matmul ins(%19, %transposed_9 : tensor<1x84xf32>, tensor<84x10xf32>) outs(%22 : tensor<1x10xf32>) -> tensor<1x10xf32>

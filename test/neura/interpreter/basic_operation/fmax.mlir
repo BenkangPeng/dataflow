@@ -103,4 +103,3 @@ func.func @test_fmax_nan_maximum_rhs() -> f32 {
   // CHECK: [neura-interpreter]  → Output: nan
   return %res : f32
 }
-

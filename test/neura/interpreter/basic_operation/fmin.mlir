@@ -103,4 +103,3 @@ func.func @test_fmin_nan_minimum_rhs() -> f32 {
   // CHECK: [neura-interpreter]  → Output: nan
   return %res : f32
 }
-
